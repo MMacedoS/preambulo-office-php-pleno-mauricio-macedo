@@ -30,6 +30,13 @@
 
 ```
 
+> **rodar o projeto:**  
+> no terminal ou cmd execute o `docker-compose up -d`
+> no terminal ou cmd execute o `docker exec -it app composer install`
+
+> no terminal ou cmd execute o `docker exec -it app php artisan key:generate`
+> no terminal ou cmd execute o `docker exec -it app php artisan migrate`
+
 ---
 
 > **Observação:**  
