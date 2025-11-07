@@ -31,15 +31,15 @@
 ```
 
 > **rodar o projeto:**  
-> no terminal ou cmd execute o `docker-compose up -d`;
+> No terminal ou cmd execute o `docker-compose up -d`;
 
-> no terminal ou cmd execute o `docker exec -it app composer install`;
+> No terminal ou cmd execute o `docker exec -it app composer install`;
 
-> no terminal ou cmd execute o `docker exec -it app php artisan key:generate`;
+> No terminal ou cmd execute o `docker exec -it app php artisan key:generate`;
 
-> no terminal ou cmd execute o `docker exec -it app php artisan migrate`;
+> No terminal ou cmd execute o `docker exec -it app php artisan migrate`;
 
 ---
 
 > **Observação:**  
-> projeto de um sistema de locação para filmes
+> Projeto de um sistema de locação para filmes
