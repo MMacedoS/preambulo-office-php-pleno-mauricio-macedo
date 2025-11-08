@@ -21,12 +21,22 @@ class UsuarioRepository implements IUsuarioRepository
 
     public function create(array $data)
     {
-        $usuario = $this->model->create($data);
-        $this->setCachedObject($usuario, 3600);
-        return $usuario;
+        if (empty($data) || !isset($data['email'])) {
+            return null;
+        }
+
+        try {
+            $usuario = $this->model->create($data);
+            if (is_null($usuario->id)) {
+                return null;
+            }
+
+            $this->setCachedObject($usuario, 3600);
+            return $usuario;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
-
-
 
     public function findAll(array $criteria = [], array $orderBy = [], array $orWhereCriteria = [])
     {
@@ -41,25 +51,35 @@ class UsuarioRepository implements IUsuarioRepository
     {
         $usuario = $this->model->find($id);
 
-        if ($usuario) {
-            $usuario->update($data);
-            $this->deleteFromCacheById($id);
-            $this->removeCachedItem($this->model->getTable() . '_all');
-            return $usuario;
+        if (is_null($usuario)) {
+            return null;
         }
 
-        return null;
+        try {
+            $usuario->update($data);
+            $this->setCachedObject($usuario, 3600);
+            $this->removeCachedItem($this->model->getTable() . '_all');
+            return $usuario;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function delete(int $id)
     {
         $usuario = $this->model->find($id);
 
-        if ($usuario) {
+        if (is_null($usuario)) {
+            return null;
+        }
+
+        try {
             $usuario->delete();
             $this->deleteFromCacheById($id);
             $this->removeCachedItem($this->model->getTable() . '_all');
             return true;
+        } catch (\Exception $e) {
+            return null;
         }
 
         return false;

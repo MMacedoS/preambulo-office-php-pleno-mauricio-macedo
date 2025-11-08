@@ -18,7 +18,7 @@ class TestarRedis extends Command
 
             $valor = Cache::get('teste_key');
             if ($valor === 'teste_valor') {
-                $this->line('funcionando...');
+                $this->line('funcionando...' . $valor);
             }
 
             Cache::forever('teste_forever', 'valor_permanente');

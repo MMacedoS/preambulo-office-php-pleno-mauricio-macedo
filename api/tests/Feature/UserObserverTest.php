@@ -4,13 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Enums\UserRole;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
-use Tests\TestCase;
 
-class UserObserverTest extends TestCase
+class UserObserverTest extends \Tests\TestCase
 {
-    use RefreshDatabase;
 
     /**
      * Testa se o observer é acionado ao criar um usuário
