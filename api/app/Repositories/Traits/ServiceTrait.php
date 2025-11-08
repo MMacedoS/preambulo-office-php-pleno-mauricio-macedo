@@ -10,8 +10,13 @@ trait ServiceTrait
             return null;
         }
 
-        $class = $this->model();
-        return $class::find($id);
+        $cacheKey = $this->model->getTable() . '_' . $id;
+
+        return $this->getFromCacheOrFetch(
+            $cacheKey,
+            fn() => $this->model->find($id),
+            3600
+        );
     }
 
     private function model()
@@ -47,17 +52,17 @@ trait ServiceTrait
 
     public function findByUuid(string $uuid)
     {
-        return $this
-            ->model()::where(
-                [
-                    'uuid' => $uuid
-                ]
-            )
-            ->first();
+        $cacheKey = $this->model->getTable() . '_uuid_' . $uuid;
+
+        return $this->getFromCacheOrFetch(
+            $cacheKey,
+            fn() => $this->model->where('uuid', $uuid)->first(),
+            3600
+        );
     }
 
     public function count()
     {
-        return $this->model()::count();
+        return $this->model->count();
     }
 }

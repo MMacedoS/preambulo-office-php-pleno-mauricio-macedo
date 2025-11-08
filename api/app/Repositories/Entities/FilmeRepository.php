@@ -21,28 +21,6 @@ class FilmeRepository implements IFilmeRepository
         return $filme;
     }
 
-    public function findById(int $id)
-    {
-        return $this->getFromCacheOrFetch(
-            $this->model->getTable() . '_' . $id,
-            function () use ($id) {
-                return $this->findById($id);
-            },
-            3600
-        );
-    }
-
-    public function findByUuid(string $uuid)
-    {
-        return $this->getFromCacheOrFetch(
-            $this->model->getTable() . '_uuid_' . $uuid,
-            function () use ($uuid) {
-                return $this->findByUuid($uuid);
-            },
-            3600
-        );
-    }
-
     public function findAll()
     {
         return $this->getFromCacheOrFetch(
