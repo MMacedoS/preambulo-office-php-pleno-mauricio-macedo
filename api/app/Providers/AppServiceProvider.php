@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Movies\Filme;
+use App\Models\User;
 use App\Observers\Movies\FilmeObserver;
+use App\Observers\Users\UserObserver;
 use App\Repositories\Contracts\Auth\IAuthRepository;
 use App\Repositories\Contracts\Movies\IFilmeRepository;
 use App\Repositories\Contracts\Users\IUsuarioRepository;
@@ -33,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Filme::observe(FilmeObserver::class);
+        User::observe(UserObserver::class);
 
         RateLimiter::for('user', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip())
