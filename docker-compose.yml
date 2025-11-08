@@ -16,9 +16,20 @@ services:
     working_dir: /var/www/html
     volumes:
       - ./api:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=app
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
     depends_on:
       - db
       - redis
+      - mailhog
 
   nginx:
     image: nginx:latest
@@ -35,9 +46,9 @@ services:
     image: postgres:15
     container_name: db
     environment:
-      - POSTGRES_DB=app
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
     ports:
       - "5432:5432"
     volumes:
@@ -47,8 +58,8 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
     depends_on:
@@ -61,14 +72,18 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
 
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
-      - "8025:8025"
       - "1025:1025"
+      - "8025:8025"
 
 volumes:
   pgdata:
   pgadmin-data:
+  redis-data:

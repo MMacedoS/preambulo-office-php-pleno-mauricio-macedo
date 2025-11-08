@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\films\Filme;
+use App\Observers\FilmeObserver;
+use App\Repositories\Contracts\IFilmeRepository;
+use App\Repositories\Contracts\IUsuarioRepository;
+use App\Repositories\Entities\FilmeRepository;
+use App\Repositories\Entities\UsuarioRepository;
 use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(IUsuarioRepository::class, UsuarioRepository::class);
+        $this->app->bind(IFilmeRepository::class, FilmeRepository::class);
     }
 
     /**
@@ -22,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Filme::observe(FilmeObserver::class);
+
         RateLimiter::for('user', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip())
                 ->response(function ($request, array $headers) {
