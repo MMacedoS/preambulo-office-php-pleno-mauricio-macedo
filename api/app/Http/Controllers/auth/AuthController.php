@@ -3,32 +3,35 @@
 namespace App\Http\Controllers\auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Faker\Provider\ar_EG\Person;
+use App\Repositories\Contracts\Auth\IAuthRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
-    function login(Request $request)
+    protected IAuthRepository $authRepository;
+
+    public function __construct(IAuthRepository $authRepository)
+    {
+        $this->authRepository = $authRepository;
+    }
+
+    public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => 'required|email:rfc,dns',
             'password' => 'required|string|min:8',
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        $result = $this->authRepository->login($credentials['email'], $credentials['password']);
+
+        if (!$result) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user = User::where('email', $credentials['email'])->first();
-        $token = $user->createToken('api_token', ['user:read', 'user:create'])->plainTextToken;
-
-        return response()->json(['message' => 'Login successful', 'token' => $token], 200);
+        return response()->json(['message' => 'Login successful', 'token' => $result['token']], 200);
     }
 
-    function register(Request $request)
+    public function register(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -36,18 +39,12 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
+        $result = $this->authRepository->register($validated);
 
-        $token = $user->createToken('api_token', ['user:read', 'user:create'])->plainTextToken;
-
-        return response()->json(['message' => 'User registered successfully', 'user' => $user, 'token' => $token], 201);
+        return response()->json(['message' => 'User registered successfully', 'user' => $result['user'], 'token' => $result['token']], 201);
     }
 
-    function logout(Request $request)
+    public function logout(Request $request)
     {
         $token = $request->bearerToken();
 
@@ -55,13 +52,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'No token provided'], 400);
         }
 
-        $accessToken = PersonalAccessToken::findToken($token);
+        $success = $this->authRepository->logout($token);
 
-        if (!$accessToken) {
+        if (!$success) {
             return response()->json(['message' => 'Invalid token'], 400);
         }
-
-        $accessToken->delete();
 
         return response()->json(['message' => 'Logout successful']);
     }

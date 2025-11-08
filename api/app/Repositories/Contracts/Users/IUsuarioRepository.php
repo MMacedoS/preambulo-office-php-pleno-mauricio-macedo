@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Contracts;
+namespace App\Repositories\Contracts\Users;
 
-interface IFilmeRepository
+interface IUsuarioRepository
 {
     public function create(array $data);
     public function findById(int $id);

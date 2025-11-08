@@ -1,34 +1,27 @@
 <?php
 
-namespace App\Repositories\Entities;
+namespace App\Repositories\Entities\Movies;
 
-use App\Models\User;
-use App\Repositories\Contracts\IUsuarioRepository;
+use App\Models\films\Filme;
+use App\Repositories\Contracts\Movies\IFilmeRepository;
 use App\Repositories\Traits\SingletonTrait;
 use App\Repositories\Traits\ServiceTrait;
 use App\Repositories\Traits\CacheTrait;
 
-class UsuarioRepository implements IUsuarioRepository
+class FilmeRepository implements IFilmeRepository
 {
     use SingletonTrait, ServiceTrait, CacheTrait;
 
-    protected $model;
-
-    public function __construct()
-    {
-        $this->model = new User();
-    }
+    public function __construct(protected Filme $model) {}
 
     public function create(array $data)
     {
-        $usuario = $this->model->create($data);
-        $this->setCachedObject($usuario, 3600);
-        return $usuario;
+        $filme = $this->model->create($data);
+        $this->setCachedObject($filme, 3600);
+        return $filme;
     }
 
-
-
-    public function findAll(array $criteria = [], array $orderBy = [], array $orWhereCriteria = [])
+    public function findAll()
     {
         return $this->getFromCacheOrFetch(
             $this->model->getTable() . '_all',
@@ -39,29 +32,26 @@ class UsuarioRepository implements IUsuarioRepository
 
     public function update(int $id, array $data)
     {
-        $usuario = $this->model->find($id);
-
-        if ($usuario) {
-            $usuario->update($data);
+        $filme = $this->model->find($id);
+        if ($filme) {
+            $filme->update($data);
             $this->deleteFromCacheById($id);
             $this->removeCachedItem($this->model->getTable() . '_all');
-            return $usuario;
+            $this->setCachedObject($filme, 3600);
+            return true;
         }
-
-        return null;
+        return false;
     }
 
     public function delete(int $id)
     {
-        $usuario = $this->model->find($id);
-
-        if ($usuario) {
-            $usuario->delete();
+        $filme = $this->model->find($id);
+        if ($filme) {
+            $filme->delete();
             $this->deleteFromCacheById($id);
             $this->removeCachedItem($this->model->getTable() . '_all');
             return true;
         }
-
         return false;
     }
 }

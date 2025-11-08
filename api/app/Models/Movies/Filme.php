@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\films;
+namespace App\Models\Movies;
 
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;

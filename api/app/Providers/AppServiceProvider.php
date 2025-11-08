@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
-use App\Models\films\Filme;
-use App\Observers\FilmeObserver;
-use App\Repositories\Contracts\IFilmeRepository;
-use App\Repositories\Contracts\IUsuarioRepository;
-use App\Repositories\Entities\FilmeRepository;
-use App\Repositories\Entities\UsuarioRepository;
+use App\Models\Movies\Filme;
+use App\Observers\Movies\FilmeObserver;
+use App\Repositories\Contracts\Auth\IAuthRepository;
+use App\Repositories\Contracts\Movies\IFilmeRepository;
+use App\Repositories\Contracts\Users\IUsuarioRepository;
+use App\Repositories\Entities\Auth\AuthRepository;
+use App\Repositories\Entities\Movies\FilmeRepository;
+use App\Repositories\Entities\Users\UsuarioRepository;
 use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
@@ -22,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(IUsuarioRepository::class, UsuarioRepository::class);
         $this->app->bind(IFilmeRepository::class, FilmeRepository::class);
+        $this->app->bind(IAuthRepository::class, AuthRepository::class);
     }
 
     /**
