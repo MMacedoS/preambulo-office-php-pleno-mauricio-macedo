@@ -3,6 +3,7 @@
 namespace App\Observers\Rental;
 
 use App\Models\Rental\LocacaoFilme;
+use App\Repositories\Entities\Rental\LocacaoRepository;
 use App\Repositories\Traits\CacheTrait;
 use App\Traits\ValidationTrait;
 
@@ -19,7 +20,10 @@ class LocacaoFilmeObserver
         return true;
     }
 
-    public function created(LocacaoFilme $locacaoFilme): void {}
+    public function created(LocacaoFilme $locacaoFilme): void
+    {
+        $this->updateLocacaoTotalValue($locacaoFilme);
+    }
 
     public function updating(LocacaoFilme $locacaoFilme): bool
     {
@@ -32,6 +36,7 @@ class LocacaoFilmeObserver
     public function updated(LocacaoFilme $locacaoFilme): void
     {
         $this->removeCachedObject($locacaoFilme);
+        $this->updateLocacaoTotalValue($locacaoFilme);
     }
 
     public function deleting(LocacaoFilme $locacaoFilme): bool
@@ -42,13 +47,18 @@ class LocacaoFilmeObserver
     public function deleted(LocacaoFilme $locacaoFilme): void
     {
         $this->removeCachedObject($locacaoFilme);
+        $this->updateLocacaoTotalValue($locacaoFilme);
     }
 
-    public function restored(LocacaoFilme $locacaoFilme): void {}
+    public function restored(LocacaoFilme $locacaoFilme): void
+    {
+        $this->updateLocacaoTotalValue($locacaoFilme);
+    }
 
     public function forceDeleted(LocacaoFilme $locacaoFilme): void
     {
         $this->removeCachedObject($locacaoFilme);
+        $this->updateLocacaoTotalValue($locacaoFilme);
     }
 
     public function isRequired(LocacaoFilme $model): bool
@@ -62,5 +72,14 @@ class LocacaoFilmeObserver
                 'preco_unitario',
             ]
         );
+    }
+
+    private function updateLocacaoTotalValue(LocacaoFilme $locacaoFilme): void
+    {
+        try {
+            $locacaoRepository = app(LocacaoRepository::class);
+            $locacaoRepository->updateLocacaoTotalValue($locacaoFilme->locacao_id);
+        } catch (\Exception $e) {
+        }
     }
 }

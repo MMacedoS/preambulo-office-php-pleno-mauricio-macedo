@@ -43,6 +43,8 @@ class LocacaoRepository implements ILocacaoRepository
                 ]
             );
         }
+
+        $this->updateLocacaoTotalValue($locacaoId);
     }
 
     public function detachMoviesFromLocacao(string $locacaoId, array $filmes): void
@@ -59,6 +61,9 @@ class LocacaoRepository implements ILocacaoRepository
         foreach ($filmes as $filme) {
             $locacao->filmes()->detach($filme->id);
         }
+
+        // Atualizar valor_total da locação
+        $this->updateLocacaoTotalValue($locacaoId);
     }
 
     public function calculateTotalValue(string $locacaoId): float
@@ -80,7 +85,7 @@ class LocacaoRepository implements ILocacaoRepository
         $total = $this->calculateTotalValue($locacaoId);
         $locacao = $this->findById($locacaoId);
         if (!is_null($locacao)) {
-            $locacao->update(['total' => $total]);
+            $locacao->update(['valor_total' => $total]);
         }
     }
 
