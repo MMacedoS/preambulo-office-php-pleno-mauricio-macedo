@@ -13,8 +13,8 @@ class LocacaoRepositoryTest extends \Tests\TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->locacaoRepository = LocacaoRepository::class;
-        $this->locacaoFilmesRepository = ILocacaoFilmesRepository::class;
+        $this->locacaoRepository = app(LocacaoRepository::class);
+        $this->locacaoFilmesRepository = app(ILocacaoFilmesRepository::class);
     }
 
     public function tearDown(): void
