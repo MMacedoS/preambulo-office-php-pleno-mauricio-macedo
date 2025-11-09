@@ -1,12 +1,13 @@
 #!/bin/bash
 
-cd "$(dirname "$0")/api" || exit 1
+# Run tests inside the Docker container
+cd "$(dirname "$0")" || exit 1
 
 case "${1:-.}" in
     "")
-        /home/void/.config/herd-lite/bin/php ./vendor/bin/phpunit --colors
+        sudo docker compose exec -T api php ./vendor/bin/phpunit --colors
         ;;
     *)
-        /home/void/.config/herd-lite/bin/php ./vendor/bin/phpunit "$1" --colors
+        sudo docker compose exec -T api php ./vendor/bin/phpunit "$1" --colors
         ;;
 esac
