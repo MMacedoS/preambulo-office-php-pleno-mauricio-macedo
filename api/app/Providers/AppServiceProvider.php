@@ -12,9 +12,11 @@ use App\Observers\Rental\LocacaoObserver;
 use App\Observers\Users\UserObserver;
 use App\Repositories\Contracts\Auth\IAuthRepository;
 use App\Repositories\Contracts\Movies\IFilmeRepository;
+use App\Repositories\Contracts\Rental\ILocacaoRepository;
 use App\Repositories\Contracts\Users\IUsuarioRepository;
 use App\Repositories\Entities\Auth\AuthRepository;
 use App\Repositories\Entities\Movies\FilmeRepository;
+use App\Repositories\Entities\Rental\LocacaoRepository;
 use App\Repositories\Entities\Users\UsuarioRepository;
 use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -31,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(IUsuarioRepository::class, UsuarioRepository::class);
         $this->app->bind(IFilmeRepository::class, FilmeRepository::class);
         $this->app->bind(IAuthRepository::class, AuthRepository::class);
+        $this->app->bind(ILocacaoRepository::class, LocacaoRepository::class);
+        $this->app->bind(\App\Repositories\Contracts\Rental\ILocacaoFilmesRepository::class, \App\Repositories\Entities\Rental\LocacaoFilmesRepository::class);
     }
 
     /**

@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class LocacaoRepository implements ILocacaoRepository
 {
+    private const PENDING_STATUSES = "atrasado";
+    private const ACTIVE_STATUSES = "ativo";
     protected $model;
     protected LocacaoFilmesRepository $locacaoFilmesRepository;
 
@@ -43,6 +45,10 @@ class LocacaoRepository implements ILocacaoRepository
     public function create(array $data)
     {
         if (empty($data)) {
+            return null;
+        }
+
+        if ($this->isRentalStatusPending($data['usuario_id'])) {
             return null;
         }
 
@@ -143,7 +149,7 @@ class LocacaoRepository implements ILocacaoRepository
     {
         return $this->model
             ->where('data_devolucao', '<', now()->toDateString())
-            ->where('status', 'ativo')
+            ->whereIn('status', [self::ACTIVE_STATUSES, self::PENDING_STATUSES])
             ->with('usuario', 'filmes')
             ->get();
     }
@@ -181,7 +187,10 @@ class LocacaoRepository implements ILocacaoRepository
         }
 
         try {
-            $locacao->update(['multa' => $penalty]);
+            $locacao->update([
+                'multa' => $penalty,
+                'status' => 'atrasado'
+            ]);
             return true;
         } catch (\Exception $e) {
             return false;
@@ -207,5 +216,15 @@ class LocacaoRepository implements ILocacaoRepository
             'failed' => $failed,
             'total' => $expiredRentals->count(),
         ];
+    }
+
+    private function isRentalStatusPending(int $clientId): bool
+    {
+        $count = $this->model
+            ->where('usuario_id', $clientId)
+            ->where('status', self::PENDING_STATUSES)
+            ->count();
+
+        return $count > 0;
     }
 }

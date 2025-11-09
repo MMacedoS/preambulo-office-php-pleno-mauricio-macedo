@@ -62,14 +62,13 @@ class LocacaoTransformer
         return [
             'id' => 'uuid',
             'code' => 'id',
-            'client' => 'usuario_id',
+            'client_id' => 'usuario_id',
             'rental_date' => 'data_inicio',
             'return_date' => 'data_devolucao',
+            'movies' => 'filmes',
             'total_value' => 'valor_total',
             'penalty' => 'multa',
             'status' => 'status',
-            'created_at' => 'created_at',
-            'updated_at' => 'updated_at',
         ];
     }
 
