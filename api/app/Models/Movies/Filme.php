@@ -22,4 +22,9 @@ class Filme extends Model
         'valor_aluguel',
         'quantidade',
     ];
+
+    public function locacaoFilmes()
+    {
+        return $this->hasMany(\App\Models\Rental\LocacaoFilme::class, 'filme_id');
+    }
 }

@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Movies\Filme;
+use App\Models\Rental\Locacao;
+use App\Models\Rental\LocacaoFilme;
 use App\Models\User;
 use App\Observers\Movies\FilmeObserver;
+use App\Observers\Rental\LocacaoFilmeObserver;
+use App\Observers\Rental\LocacaoObserver;
 use App\Observers\Users\UserObserver;
 use App\Repositories\Contracts\Auth\IAuthRepository;
 use App\Repositories\Contracts\Movies\IFilmeRepository;
@@ -36,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Filme::observe(FilmeObserver::class);
         User::observe(UserObserver::class);
+        LocacaoFilme::observe(LocacaoFilmeObserver::class);
+        Locacao::observe(LocacaoObserver::class);
 
         RateLimiter::for('user', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip())

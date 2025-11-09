@@ -122,4 +122,14 @@ abstract class TestCase extends BaseTestCase
             'Authorization' => "Bearer {$token}",
         ];
     }
+
+    public function mockLocacao(array $locacaoData = [])
+    {
+        return \App\Models\Rental\Locacao::factory()->create($locacaoData);
+    }
+
+    public function mockLocacaoFilme(array $locacaoFilmeData = [])
+    {
+        return \App\Models\Rental\LocacaoFilme::factory()->create($locacaoFilmeData);
+    }
 }

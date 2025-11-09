@@ -51,4 +51,9 @@ class User extends Authenticatable
             'role' => UserRole::class,
         ];
     }
+
+    public function locacoes()
+    {
+        return $this->hasMany(\App\Models\Rental\Locacao::class, 'usuario_id');
+    }
 }
