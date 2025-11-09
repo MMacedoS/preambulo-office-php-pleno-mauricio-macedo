@@ -28,4 +28,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         'rentals/{rental}/calculate-total',
         [\App\Http\Controllers\Rental\LocacaoController::class, 'calculateTotal']
     )->middleware('permission:gerenciar_alugueis');
+
+    Route::post(
+        'rentals/{rental}/process-return',
+        [\App\Http\Controllers\Rental\LocacaoController::class, 'effectuateReturn']
+    )->middleware('permission:gerenciar_alugueis');
 });

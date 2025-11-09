@@ -167,4 +167,24 @@ class LocacaoControllerTest extends \Tests\TestCase
             'movies',
         ]);
     }
+
+    public function test_show_locacao_endpoint(): void
+    {
+        $user = $this->mockUsuarioAdmin();
+        $locacao = $this->mockLocacoesWithMovies(['data_devolucao' => now()->subDays(5)->toDateString(), 'data_inicio' => now()->subDays(10)->toDateString()]);
+
+        $response = $this->withHeaders(
+            $this->getAuthHeaders($user)
+        )->getJson("/api/v1/rentals/{$locacao->uuid}");
+
+        $response->assertStatus(200);
+        $responseData = $response->json('data');
+        $this->assertEquals($locacao->uuid, $responseData['id']);
+        $this->assertEquals($locacao->id, $responseData['code']);
+        $this->assertEquals($locacao->usuario->uuid, $responseData['client']['id']);
+        $this->assertCount(2, $responseData['movies']);
+        $this->assertEquals($locacao->status, $responseData['status']);
+        $this->assertEqualsWithDelta($locacao->valor_total, $responseData['total_value'], 0.01);
+        $this->assertEqualsWithDelta(50.00, $responseData['penalty'], 0.01);
+    }
 }

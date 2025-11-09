@@ -52,7 +52,7 @@ class LocacaoController extends Controller
             return response()->json(['message' => 'Locação não encontrada'], 422);
         }
 
-        $transformed = $this->locacaoTransformer->transform($locacao);
+        $transformed = $this->locacaoTransformer->transformRental($locacao);
         return response()->json(['data' => $transformed], 200);
     }
 
@@ -150,6 +150,7 @@ class LocacaoController extends Controller
         $transformed = $this->locacaoTransformer->transform($locacao);
         return response()->json(['data' => $transformed], 200);
     }
+
     public function destroy($id)
     {
         $locacao = $this->loadRentalByUuid($id);
@@ -170,6 +171,18 @@ class LocacaoController extends Controller
         }
 
         return response()->json([], 204);
+    }
+
+    public function effectuateReturn(Request $request, $locacaoId)
+    {
+        $locacao = $this->loadRentalByUuid($locacaoId);
+        if (is_null($locacao)) {
+            return response()->json(['message' => 'Locação não encontrada'], 422);
+        }
+
+        $this->locacaoRepository->processReturn($locacao->id);
+
+        return response()->json(['message' => 'Devolução efetuada com sucesso.'], 200);
     }
 
     public function attachMovies(Request $request, $locacaoId)

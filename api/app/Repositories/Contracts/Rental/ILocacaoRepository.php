@@ -14,7 +14,8 @@ interface ILocacaoRepository
     public function rentalActiveCount(): int;
     public function rentalCompletedCount(): int;
     public function getExpiredRentals();
-    public function calculateDailyPenalty(string $locacaoId): float;
-    public function updatePenalty(string $locacaoId): bool;
+    public function calculateDailyPenalty(int $locacaoId): float;
+    public function updatePenalty(int $locacaoId): bool;
     public function updateAllExpiredPenalties(): array;
+    public function processReturn(int $locacaoId): bool;
 }

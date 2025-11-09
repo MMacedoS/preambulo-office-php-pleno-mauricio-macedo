@@ -118,13 +118,45 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function mockLocacao(array $locacaoData = [])
+    public function mockLocacao(array $locacaoData = [], $status = 'ativo')
     {
+        $locacaoData['status'] = $status;
         return \App\Models\Rental\Locacao::factory()->create($locacaoData);
     }
 
     public function mockLocacaoFilme(array $locacaoFilmeData = [])
     {
         return \App\Models\Rental\LocacaoFilme::factory()->create($locacaoFilmeData);
+    }
+
+    public function mockLocacoesWithMovies(array $locacaoData = [])
+    {
+        $client = $this->mockUsuarioCliente();
+        $filme1 = $this->mockFilme(['quantidade' => 5, 'valor_aluguel' => 10.00]);
+        $filme2 = $this->mockFilme(['quantidade' => 3, 'valor_aluguel' => 15.00]);
+
+        $locacaoData['usuario_id'] = $client->id;
+        $locacao = $this->mockLocacao($locacaoData);
+
+        $locacaoFilme1 = $this->mockLocacaoFilme([
+            'locacao_id' => $locacao->id,
+            'filme_id' => $filme1->id,
+            'quantidade' => 1,
+            'preco_unitario' => 10.00,
+        ]);
+
+        $locacaoFilme2 = $this->mockLocacaoFilme([
+            'locacao_id' => $locacao->id,
+            'filme_id' => $filme2->id,
+            'quantidade' => 1,
+            'preco_unitario' => 15.00,
+        ]);
+
+        $valorTotal = ($locacaoFilme1->quantidade * $locacaoFilme1->preco_unitario) +
+            ($locacaoFilme2->quantidade * $locacaoFilme2->preco_unitario);
+
+        $locacao->update(['valor_total' => $valorTotal]);
+
+        return $locacao->fresh('filmes');
     }
 }

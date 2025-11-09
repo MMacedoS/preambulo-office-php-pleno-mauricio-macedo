@@ -3,6 +3,7 @@
 namespace App\Transformers\Rental;
 
 use App\Models\Rental\Locacao;
+use App\Repositories\Entities\Rental\LocacaoRepository;
 use App\Repositories\Entities\Users\UsuarioRepository;
 use Illuminate\Database\Eloquent\Collection;
 use App\Traits\TransformerTrait;
@@ -75,5 +76,28 @@ class LocacaoTransformer
     public function transformArray(array $data)
     {
         return $this->transformKeys($data, $this->originalAttribute());
+    }
+
+    public function transformRental(Locacao $locacao): array
+    {
+        return [
+            'id' => $locacao->uuid,
+            'code' => $locacao->id,
+            'client' => $this->prepareCliente($locacao->usuario_id),
+            'rental_date' => $locacao->data_inicio,
+            'return_date' => $locacao->data_devolucao,
+            'total_value' => $locacao->valor_total,
+            'penalty' => $this->preparePenalty($locacao),
+            'movies' => $this->prepareMovies($locacao->filmes),
+            'status' => $locacao->status,
+            'created_at' => $locacao->created_at,
+            'updated_at' => $locacao->updated_at,
+        ];
+    }
+
+    private function preparePenalty(Locacao $locacao): float
+    {
+        $locacaoRepository = LocacaoRepository::getInstance();
+        return $locacaoRepository->calculateDailyPenalty($locacao->id);
     }
 }

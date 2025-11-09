@@ -30,6 +30,18 @@ class LocacaoObserver
 
     public function updated(Locacao $locacao)
     {
+        if (
+            $locacao->filmes()->exists() &&
+            $locacao->isDirty('status') &&
+            $locacao->status === 'devolvido'
+        ) {
+            foreach ($locacao->filmes as $filme) {
+                $quantidade = $filme->pivot->quantidade;
+                $filme->increment('quantidade', $quantidade);
+                $this->removeCachedObject($filme);
+            }
+        }
+
         $this->removeCachedObject($locacao);
     }
 

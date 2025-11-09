@@ -154,8 +154,12 @@ class LocacaoRepository implements ILocacaoRepository
             ->get();
     }
 
-    public function calculateDailyPenalty(string $locacaoId): float
+    public function calculateDailyPenalty(int $locacaoId): float
     {
+        if (is_null($locacaoId)) {
+            return 0.0;
+        }
+
         $locacao = $this->findById($locacaoId);
         if (is_null($locacao)) {
             return 0.0;
@@ -177,7 +181,7 @@ class LocacaoRepository implements ILocacaoRepository
         return $daysOverdue * $numberOfMovies * $penaltyPerFilm;
     }
 
-    public function updatePenalty(string $locacaoId): bool
+    public function updatePenalty(int $locacaoId): bool
     {
         $penalty = $this->calculateDailyPenalty($locacaoId);
         $locacao = $this->findById($locacaoId);
@@ -226,5 +230,27 @@ class LocacaoRepository implements ILocacaoRepository
             ->count();
 
         return $count > 0;
+    }
+
+    public function processReturn(int $locacaoId): bool
+    {
+        $locacao = $this->findById($locacaoId);
+        if (is_null($locacao)) {
+            return false;
+        }
+
+        try {
+            DB::transaction(function () use ($locacao) {
+                $locacao->update([
+                    'status' => 'devolvido',
+                    'multa' => $this->calculateDailyPenalty($locacao->id),
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('LocacaoRepository::processReturn - Exception: ' . $e->getMessage());
+            return false;
+        }
+
+        return true;
     }
 }

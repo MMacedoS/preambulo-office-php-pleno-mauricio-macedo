@@ -9,7 +9,7 @@ trait SingletonTrait
     public static function getInstance()
     {
         if (is_null(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = app(static::class);
         }
         return self::$instance;
     }
