@@ -31,6 +31,54 @@ services:
       - redis
       - mailhog
 
+  queue-worker:
+    build:
+      context: ./docker/php
+    container_name: queue-worker
+    working_dir: /var/www/html
+    volumes:
+      - ./api:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=app
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+    command: php artisan queue:work --delay=0 --backoff=1 --tries=3
+    depends_on:
+      - db
+      - redis
+      - mailhog
+      - api
+
+  scheduler:
+    build:
+      context: ./docker/php
+    container_name: scheduler
+    working_dir: /var/www/html
+    volumes:
+      - ./api:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=app
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+    command: php artisan schedule:work
+    depends_on:
+      - db
+      - redis
+      - mailhog
+      - api
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -55,17 +103,12 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: adminer
     container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - "5050:8080"
     depends_on:
       - db
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
 
   redis:
     image: redis:alpine
@@ -85,5 +128,4 @@ services:
 
 volumes:
   pgdata:
-  pgadmin-data:
   redis-data:
