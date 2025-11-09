@@ -10,6 +10,17 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function ($schedule) {
+        $schedule->command(\App\Console\Commands\ProcessExpiredRentalsCommand::class)
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onSuccess(function () {
+                \Illuminate\Support\Facades\Log::info('Comando de processamento de locações expiradas executado com sucesso');
+            })
+            ->onFailure(function () {
+                \Illuminate\Support\Facades\Log::error('Comando de processamento de locações expiradas falhou');
+            });
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prependToGroup('api', [
             \App\Http\Middleware\ForceJsonResponse::class
