@@ -60,4 +60,55 @@ abstract class TestCase extends BaseTestCase
         $this->actingAs($user);
         return $user;
     }
+
+    public function prepareTokenAdmin()
+    {
+        $user = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('password'),
+            'role' => UserRole::ADMINISTRADOR,
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'user' => $user,
+            'token' => $token,
+        ];
+    }
+
+    public function prepareTokenAtendente()
+    {
+        $user = User::factory()->create([
+            'name' => 'Atendente User',
+            'email' => 'atendente@gmail.com',
+            'password' => bcrypt('password'),
+            'role' => UserRole::ATENDENTE,
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'user' => $user,
+            'token' => $token,
+        ];
+    }
+
+    public function prepareTokenCliente()
+    {
+        $user = User::factory()->create([
+            'name' => 'Cliente User',
+            'email' => 'cliente@gmail.com',
+            'password' => bcrypt('password'),
+            'role' => UserRole::CLIENTE,
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'user' => $user,
+            'token' => $token,
+        ];
+    }
 }

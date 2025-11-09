@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Observers\Users;
 
 use App\Models\User;
 use App\Enums\UserRole;

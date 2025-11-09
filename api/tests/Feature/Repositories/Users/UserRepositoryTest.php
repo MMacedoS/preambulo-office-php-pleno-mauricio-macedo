@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Users;
+namespace Tests\Feature\Repositories\Users;
 
 
 class UserRepositoryTest extends \Tests\TestCase
