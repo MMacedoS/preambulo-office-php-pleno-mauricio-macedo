@@ -115,7 +115,22 @@ abstract class TestCase extends BaseTestCase
 
     public function mockFilme()
     {
-        $filmeData = Filme::factory()->make();
+        $filmeData = Filme::factory()->create();
         return $filmeData;
+    }
+
+    public function getAuthHeaders($user): array
+    {
+        if ($user instanceof User) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+        }
+
+        if (is_array($user) && isset($user['token'])) {
+            $token = $user['token'];
+        }
+
+        return [
+            'Authorization' => "Bearer {$token}",
+        ];
     }
 }

@@ -6,6 +6,7 @@ interface IFilmeRepository
 {
     public function create(array $data);
     public function findById(int $id);
+    public function findByUuid(string $uuid);
     public function findAll();
     public function update(int $id, array $data);
     public function delete(int $id);

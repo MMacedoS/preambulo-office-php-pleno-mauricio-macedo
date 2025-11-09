@@ -70,6 +70,7 @@ class FilmeObserver
 
     public function forceDeleted(Filme $filme): void
     {
+        $this->removeCachedObject($filme);
         Log::warning('Filme deletado permanentemente', [
             'uuid' => $filme->uuid,
             'titulo' => $filme->titulo,

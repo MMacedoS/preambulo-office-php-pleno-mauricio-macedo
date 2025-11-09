@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'name' => 'João Cliente',
             'email' => 'cliente@gmail.com',
             'password' => Hash::make('password'),
@@ -23,6 +24,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'name' => 'Maria Atendente',
             'email' => 'atendente@gmail.com',
             'password' => Hash::make('password'),
@@ -31,6 +33,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'name' => 'Admin Sistema',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('password'),
@@ -39,6 +42,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'name' => 'Pedro Cliente',
             'email' => 'pedro@gmail.com',
             'password' => Hash::make('password'),
@@ -47,6 +51,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'name' => 'Ana Atendente',
             'email' => 'ana@gmail.com',
             'password' => Hash::make('password'),

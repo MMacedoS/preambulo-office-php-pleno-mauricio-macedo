@@ -23,7 +23,7 @@ class CheckPermission
             return response()->json(['error' => 'Não autenticado'], 401);
         }
 
-        $role = UserRole::from($user->role);
+        $role = UserRole::from($user->role->value);
 
         if (!in_array($permission, $role->permissions())) {
             return response()->json(['error' => 'Acesso negado'], 403);

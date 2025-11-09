@@ -25,10 +25,10 @@ class AuthController extends Controller
         $result = $this->authRepository->login($credentials['email'], $credentials['password']);
 
         if (!$result) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Credenciais inválidas'], 401);
         }
 
-        return response()->json(['message' => 'Login successful', 'token' => $result['token']], 200);
+        return response()->json(['message' => 'Login bem-sucedido', 'token' => $result['token']], 200);
     }
 
     public function register(Request $request)
@@ -41,7 +41,7 @@ class AuthController extends Controller
 
         $result = $this->authRepository->register($validated);
 
-        return response()->json(['message' => 'User registered successfully', 'user' => $result['user'], 'token' => $result['token']], 201);
+        return response()->json(['message' => 'Usuário registrado com sucesso', 'user' => $result['user'], 'token' => $result['token']], 201);
     }
 
     public function logout(Request $request)
@@ -49,15 +49,15 @@ class AuthController extends Controller
         $token = $request->bearerToken();
 
         if (!$token) {
-            return response()->json(['message' => 'No token provided'], 400);
+            return response()->json(['message' => 'Nenhum token fornecido'], 400);
         }
 
         $success = $this->authRepository->logout($token);
 
         if (!$success) {
-            return response()->json(['message' => 'Invalid token'], 400);
+            return response()->json(['message' => 'Token inválido'], 400);
         }
 
-        return response()->json(['message' => 'Logout successful']);
+        return response()->json(['message' => 'Logout bem-sucedido']);
     }
 }

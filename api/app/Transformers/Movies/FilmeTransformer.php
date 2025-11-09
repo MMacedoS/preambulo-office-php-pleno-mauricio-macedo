@@ -3,9 +3,11 @@
 namespace App\Transformers\Movies;
 
 use App\Models\Movies\Filme;
+use App\Traits\TransformerTrait;
 
 class FilmeTransformer
 {
+    use TransformerTrait;
     public function transform(Filme $filme)
     {
         return [
@@ -26,7 +28,7 @@ class FilmeTransformer
         return array_map([$this, 'transform'], $filmes->toArray());
     }
 
-    public function originalAttribute($index)
+    public function originalAttribute()
     {
         return [
             'id' => 'uuid',
@@ -39,5 +41,10 @@ class FilmeTransformer
             'quantity' => 'quantidade',
             'rental_price' => 'valor_aluguel',
         ];
+    }
+
+    public function transformArray(array $data)
+    {
+        return $this->transformKeys($data, $this->originalAttribute());
     }
 }
