@@ -23,7 +23,7 @@ class LocacaoFactory extends Factory
             'data_inicio' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'data_devolucao' => $this->faker->dateTimeBetween('now', '+1 month'),
             'valor_total' => $this->faker->randomFloat(2, 10, 200),
-            'status' => $this->faker->randomElement(['em_andamento', 'concluida', 'atrasada']),
+            'status' => $this->faker->randomElement(['ativo', 'devolvido', 'atrasado']),
             'multa' => $this->faker->randomFloat(2, 0, 50),
         ];
     }

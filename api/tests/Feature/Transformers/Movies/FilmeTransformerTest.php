@@ -16,6 +16,7 @@ class FilmeTransformerTest extends \Tests\TestCase
     {
         parent::tearDown();
     }
+
     public function test_transformer_transforms_filme_correctly(): void
     {
         $filme = $this->mockFilme();
