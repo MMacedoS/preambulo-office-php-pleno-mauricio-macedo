@@ -154,4 +154,97 @@ class LocacaoRepository implements ILocacaoRepository
             return false;
         }
     }
+
+    public function rentalExpiredsCount(): int
+    {
+        $now = now();
+        return $this->model
+            ->where('data_devolucao', '<', $now)
+            ->where('status', 'ativo')
+            ->count();
+    }
+
+    public function rentalActiveCount(): int
+    {
+        return $this->model
+            ->where('status', 'ativo')
+            ->count();
+    }
+
+    public function rentalCompletedCount(): int
+    {
+        return $this->model
+            ->where('status', 'concluido')
+            ->count();
+    }
+
+    public function getExpiredRentals()
+    {
+        return $this->model
+            ->where('data_devolucao', '<', now()->toDateString())
+            ->where('status', 'ativo')
+            ->with('usuario', 'filmes')
+            ->get();
+    }
+
+    public function calculateDailyPenalty(string $locacaoId): float
+    {
+        $locacao = $this->findById($locacaoId);
+        if (is_null($locacao)) {
+            return 0.0;
+        }
+
+        if ($locacao->data_devolucao >= now()->toDateString()) {
+            return 0.0;
+        }
+
+        $today = now()->toDateString();
+        $dataDevolucao = is_string($locacao->data_devolucao)
+            ? $locacao->data_devolucao
+            : $locacao->data_devolucao->toDateString();
+
+        $daysOverdue = (int) abs((new \DateTime($today))->diff(new \DateTime($dataDevolucao))->days);
+        $numberOfMovies = $locacao->filmes()->count();
+        $penaltyPerFilm = 5.00;
+
+        return $daysOverdue * $numberOfMovies * $penaltyPerFilm;
+    }
+
+    public function updatePenalty(string $locacaoId): bool
+    {
+        $penalty = $this->calculateDailyPenalty($locacaoId);
+        $locacao = $this->findById($locacaoId);
+
+        if (is_null($locacao)) {
+            return false;
+        }
+
+        try {
+            $locacao->update(['multa' => $penalty]);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function updateAllExpiredPenalties(): array
+    {
+        $expiredRentals = $this->getExpiredRentals();
+        $updated = 0;
+        $failed = 0;
+
+        foreach ($expiredRentals as $rental) {
+            if ($this->updatePenalty($rental->id)) {
+                $updated++;
+            } else {
+                $failed++;
+            }
+        }
+
+        return [
+            'updated' => $updated,
+            'failed' => $failed,
+            'total' => $expiredRentals->count(),
+        ];
+    }
 }
