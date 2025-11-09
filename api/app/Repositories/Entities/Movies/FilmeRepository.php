@@ -16,9 +16,18 @@ class FilmeRepository implements IFilmeRepository
 
     public function create(array $data)
     {
-        $filme = $this->model->create($data);
-        $this->setCachedObject($filme, 3600);
-        return $filme;
+        if (empty($data)) {
+            return null;
+        }
+
+        try {
+            $filme = $this->model->create($data);
+            if (is_null($filme->id)) {
+                return null;
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function findAll()
@@ -32,26 +41,36 @@ class FilmeRepository implements IFilmeRepository
 
     public function update(int $id, array $data)
     {
-        $filme = $this->model->find($id);
-        if ($filme) {
-            $filme->update($data);
-            $this->deleteFromCacheById($id);
-            $this->removeCachedItem($this->model->getTable() . '_all');
-            $this->setCachedObject($filme, 3600);
-            return true;
+        if (empty($data)) {
+            return false;
         }
-        return false;
+
+        try {
+            $filme = $this->findById($id);
+            if (is_null($filme)) {
+                return false;
+            }
+
+            $filme->update($data);
+
+            return $this->findById($id);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     public function delete(int $id)
     {
-        $filme = $this->model->find($id);
-        if ($filme) {
-            $filme->delete();
-            $this->deleteFromCacheById($id);
-            $this->removeCachedItem($this->model->getTable() . '_all');
-            return true;
+        $filme = $this->findById($id);
+        if (is_null($filme)) {
+            return false;
         }
-        return false;
+
+        try {
+            $deleted = $filme->delete();
+            return $deleted;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

@@ -3,17 +3,36 @@
 namespace App\Observers\Movies;
 
 use App\Models\Movies\Filme;
+use App\Repositories\Traits\CacheTrait;
+use App\Traits\ValidationTrait;
 use Illuminate\Support\Facades\Log;
 
 class FilmeObserver
 {
+    use ValidationTrait;
+
+    public function creating(Filme $filme): bool
+    {
+        if (!$this->isRequired($filme)) {
+            return false;
+        }
+        return true;
+    }
+
     public function created(Filme $filme): void
     {
         Log::info('Filme criado', [
             'uuid' => $filme->uuid,
             'titulo' => $filme->titulo,
-            'timestamp' => now(),
         ]);
+    }
+
+    public function updating(Filme $filme): bool
+    {
+        if (!$this->isRequired($filme)) {
+            return false;
+        }
+        return true;
     }
 
     public function updated(Filme $filme): void
@@ -21,9 +40,12 @@ class FilmeObserver
         Log::info('Filme atualizado', [
             'uuid' => $filme->uuid,
             'titulo' => $filme->titulo,
-            'mudancas' => $filme->getChanges(),
-            'timestamp' => now(),
         ]);
+    }
+
+    public function deleting(Filme $filme): bool
+    {
+        return true;
     }
 
     public function deleted(Filme $filme): void
@@ -51,5 +73,20 @@ class FilmeObserver
             'titulo' => $filme->titulo,
             'timestamp' => now(),
         ]);
+    }
+
+    public function isRequired(Filme $model): bool
+    {
+        return $this->hasRequiredModelAttributes(
+            $model,
+            [
+                'titulo',
+                'sinopse',
+                'categoria',
+                'ano_lancamento',
+                'valor_aluguel',
+                'quantidade'
+            ]
+        );
     }
 }

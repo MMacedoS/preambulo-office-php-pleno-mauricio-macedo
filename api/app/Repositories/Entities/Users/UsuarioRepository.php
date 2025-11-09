@@ -31,7 +31,6 @@ class UsuarioRepository implements IUsuarioRepository
                 return null;
             }
 
-            $this->setCachedObject($usuario, 3600);
             return $usuario;
         } catch (\Exception $e) {
             return null;
@@ -57,8 +56,6 @@ class UsuarioRepository implements IUsuarioRepository
 
         try {
             $usuario->update($data);
-            $this->setCachedObject($usuario, 3600);
-            $this->removeCachedItem($this->model->getTable() . '_all');
             return $usuario;
         } catch (\Exception $e) {
             return null;
