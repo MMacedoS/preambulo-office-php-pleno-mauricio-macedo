@@ -332,4 +332,103 @@ class FilmeControllerTest extends \Tests\TestCase
 
         $response->assertStatus(422);
     }
+
+    public function test_index_return_all_movies(): void
+    {
+        $user = $this->mockUsuarioAdmin();
+
+        $this->mockFilme(
+            [
+                'titulo' => 'Movie 1',
+                'sinopse' => 'Description 1',
+                'ano_lancamento' => 2010,
+                'categoria' => 'Sci-Fi',
+                'valor_aluguel' => 4.99,
+                'quantidade' => 10
+            ]
+        );
+
+        $this->mockFilme(
+            [
+                'titulo' => 'Movie 2',
+                'sinopse' => 'Description 2',
+                'ano_lancamento' => 2011,
+                'categoria' => 'Action',
+                'valor_aluguel' => 5.99,
+                'quantidade' => 15
+            ]
+        );
+
+        $response = $this->withHeaders($this->getAuthHeaders($user))
+            ->getJson('/api/v1/movies');
+
+        $response->assertStatus(200);
+        $this->assertCount(2, $response->json('data'));
+
+        $titles = collect($response->json('data'))->pluck('title')->toArray();
+        $this->assertContains('Movie 2', $titles);
+        $this->assertContains('Movie 1', $titles);
+
+        $this->assertArrayHasKey('meta', $response->json());
+        $this->assertArrayHasKey('total', $response->json('meta'));
+        $this->assertArrayHasKey('per_page', $response->json('meta'));
+        $this->assertArrayHasKey('current_page', $response->json('meta'));
+        $this->assertArrayHasKey('last_page', $response->json('meta'));
+    }
+
+    public function test_index_pagination_works(): void
+    {
+        $user = $this->mockUsuarioAdmin();
+
+        for ($i = 1; $i <= 30; $i++) {
+            $this->mockFilme(
+                [
+                    'titulo' => "Movie {$i}",
+                    'sinopse' => "Description {$i}",
+                    'ano_lancamento' => 2000 + $i,
+                    'categoria' => 'Genre ' . ($i % 5),
+                    'valor_aluguel' => 3.99 + $i,
+                    'quantidade' => 5 + $i
+                ]
+            );
+        }
+
+        $response = $this->withHeaders($this->getAuthHeaders($user))
+            ->getJson('/api/v1/movies?per_page=10&page=2');
+
+        $response->assertStatus(200);
+        $this->assertCount(10, $response->json('data'));
+        $this->assertEquals(30, $response->json('meta.total'));
+        $this->assertEquals(10, $response->json('meta.per_page'));
+        $this->assertEquals(2, $response->json('meta.current_page'));
+        $this->assertEquals(3, $response->json('meta.last_page'));
+    }
+
+    public function test_index_pagination_works_with_title_filter(): void
+    {
+        $user = $this->mockUsuarioAdmin();
+
+        for ($i = 1; $i <= 15; $i++) {
+            $this->mockFilme(
+                [
+                    'titulo' => "Unique Movie {$i}",
+                    'sinopse' => "Description {$i}",
+                    'ano_lancamento' => 2000 + $i,
+                    'categoria' => 'Genre ' . ($i % 3),
+                    'valor_aluguel' => 2.99 + $i,
+                    'quantidade' => 8 + $i
+                ]
+            );
+        }
+
+        $response = $this->withHeaders($this->getAuthHeaders($user))
+            ->getJson('/api/v1/movies?title=Unique Movie&per_page=5&page=2');
+
+        $response->assertStatus(200);
+        $this->assertCount(5, $response->json('data'));
+        $this->assertEquals(15, $response->json('meta.total'));
+        $this->assertEquals(5, $response->json('meta.per_page'));
+        $this->assertEquals(2, $response->json('meta.current_page'));
+        $this->assertEquals(3, $response->json('meta.last_page'));
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Transformers\Movies;
 
 use App\Models\Movies\Filme;
 use App\Traits\TransformerTrait;
+use Illuminate\Database\Eloquent\Collection;
 
 class FilmeTransformer
 {
@@ -23,9 +24,12 @@ class FilmeTransformer
         ];
     }
 
-    public function transformCollection($filmes)
+    public function transformCollection(Collection $filmes)
     {
-        return array_map([$this, 'transform'], $filmes->toArray());
+        if ($filmes->isEmpty()) {
+            return [];
+        }
+        return array_values($filmes->map([$this, 'transform'])->toArray());
     }
 
     public function originalAttribute()

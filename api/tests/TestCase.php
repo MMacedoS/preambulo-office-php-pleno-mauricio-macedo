@@ -12,16 +12,6 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
-
-    public function tearDown(): void
-    {
-        parent::tearDown();
-    }
-
     public function mockUsuarioAdmin()
     {
         $user = User::factory()->create([
@@ -113,10 +103,9 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function mockFilme()
+    public function mockFilme(array $movieData = []): Filme
     {
-        $filmeData = Filme::factory()->create();
-        return $filmeData;
+        return Filme::factory()->create($movieData);
     }
 
     public function getAuthHeaders($user): array

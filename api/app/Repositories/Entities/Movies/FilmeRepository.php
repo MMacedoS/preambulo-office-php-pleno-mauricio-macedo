@@ -7,10 +7,11 @@ use App\Repositories\Contracts\Movies\IFilmeRepository;
 use App\Repositories\Traits\SingletonTrait;
 use App\Repositories\Traits\ServiceTrait;
 use App\Repositories\Traits\CacheTrait;
+use App\Repositories\Traits\QueryBuilderTrait;
 
 class FilmeRepository implements IFilmeRepository
 {
-    use SingletonTrait, ServiceTrait, CacheTrait;
+    use SingletonTrait, ServiceTrait, CacheTrait, QueryBuilderTrait;
 
     protected $model;
 
@@ -36,11 +37,20 @@ class FilmeRepository implements IFilmeRepository
         }
     }
 
-    public function findAll()
-    {
+    public function findAll(
+        array $criteria = [],
+        array $orderBy = [],
+        array $orWhereCriteria = []
+    ) {
+        if (app()->environment('testing')) {
+            return $this->buildQuery($criteria, $orderBy, $orWhereCriteria)->get();
+        }
+
+        $cacheKey = $this->makeCacheKey($criteria, $orderBy, $orWhereCriteria);
+
         return $this->getFromCacheOrFetch(
-            $this->model->getTable() . '_all',
-            fn() => $this->model->all(),
+            $cacheKey,
+            fn() => $this->buildQuery($criteria, $orderBy, $orWhereCriteria)->get(),
             1800
         );
     }

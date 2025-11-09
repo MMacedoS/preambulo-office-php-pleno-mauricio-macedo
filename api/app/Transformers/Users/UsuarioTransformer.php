@@ -3,6 +3,7 @@
 namespace App\Transformers\Users;
 
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class UsuarioTransformer
 {
@@ -18,8 +19,11 @@ class UsuarioTransformer
         ];
     }
 
-    public function transformCollection($usuarios)
+    public function transformCollection(Collection $usuarios)
     {
-        return array_map([$this, 'transform'], $usuarios->toArray());
+        if ($usuarios->isEmpty()) {
+            return [];
+        }
+        return array_values($usuarios->map([$this, 'transform'])->toArray());
     }
 }

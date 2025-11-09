@@ -7,10 +7,11 @@ use App\Repositories\Contracts\Users\IUsuarioRepository;
 use App\Repositories\Traits\SingletonTrait;
 use App\Repositories\Traits\ServiceTrait;
 use App\Repositories\Traits\CacheTrait;
+use App\Repositories\Traits\QueryBuilderTrait;
 
 class UsuarioRepository implements IUsuarioRepository
 {
-    use SingletonTrait, ServiceTrait, CacheTrait;
+    use SingletonTrait, ServiceTrait, CacheTrait, QueryBuilderTrait;
 
     protected $model;
 
@@ -39,9 +40,11 @@ class UsuarioRepository implements IUsuarioRepository
 
     public function findAll(array $criteria = [], array $orderBy = [], array $orWhereCriteria = [])
     {
+        $cacheKey = $this->makeCacheKey($criteria, $orderBy, $orWhereCriteria);
+
         return $this->getFromCacheOrFetch(
-            $this->model->getTable() . '_all',
-            fn() => $this->model->all(),
+            $cacheKey,
+            fn() => $this->buildQuery($criteria, $orderBy, $orWhereCriteria)->get(),
             1800
         );
     }
@@ -56,7 +59,7 @@ class UsuarioRepository implements IUsuarioRepository
 
         try {
             $usuario->update($data);
-            return $usuario;
+            return $this->findById($id);
         } catch (\Exception $e) {
             return null;
         }
@@ -72,8 +75,6 @@ class UsuarioRepository implements IUsuarioRepository
 
         try {
             $usuario->delete();
-            $this->deleteFromCacheById($id);
-            $this->removeCachedItem($this->model->getTable() . '_all');
             return true;
         } catch (\Exception $e) {
             return null;

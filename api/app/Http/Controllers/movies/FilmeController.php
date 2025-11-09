@@ -4,6 +4,7 @@ namespace App\Http\Controllers\movies;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\Contracts\Movies\IFilmeRepository;
+use App\Repositories\Traits\FilterSearchTrait;
 use App\Transformers\Movies\FilmeTransformer;
 use Illuminate\Http\Request;
 
@@ -20,10 +21,23 @@ class FilmeController extends Controller
 
     public function index(Request $request)
     {
-        $filmes = $this->filmeRepository->findAll();
-        $transformed = $this->filmeTransformer->transformCollection($filmes);
+        $perPage = $request->get('per_page', 15);
+        $orderBy = $request->get('orderBy', ['created_at' => 'desc']);
+        $filters = $request->except(['per_page', 'orderBy', 'page']);
 
-        return response()->json($transformed, 200);
+        $filterData = $this->prepareFilters($filters);
+
+        $filmes = $this->filmeRepository->findAll($filterData['criteria'], $orderBy, $filterData['orWhere']);
+        $transformed = $this->filmeTransformer->transformCollection($filmes);
+        $paginated = $this->paginate($transformed, $perPage);
+
+        return response()->json(
+            [
+                'data' => $paginated->items(),
+                'meta' => $this->getPaginationMeta($paginated)
+            ],
+            200
+        );
     }
 
     public function store(Request $request)
