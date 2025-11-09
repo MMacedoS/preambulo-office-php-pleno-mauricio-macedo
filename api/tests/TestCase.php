@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Enums\UserRole;
+use App\Models\Movies\Filme;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -110,5 +111,11 @@ abstract class TestCase extends BaseTestCase
             'user' => $user,
             'token' => $token,
         ];
+    }
+
+    public function mockFilme()
+    {
+        $filmeData = Filme::factory()->make();
+        return $filmeData;
     }
 }

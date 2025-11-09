@@ -16,13 +16,28 @@ class FilmeTransformer
             'description' => $filme->sinopse,
             'release_year' => $filme->ano_lancamento,
             'genre' => $filme->categoria,
-            'created_at' => $filme->created_at,
-            'updated_at' => $filme->updated_at,
+            'quantity' => $filme->quantidade,
+            'rental_price' => $filme->valor_aluguel,
         ];
     }
 
     public function transformCollection($filmes)
     {
         return array_map([$this, 'transform'], $filmes->toArray());
+    }
+
+    public function originalAttribute($index)
+    {
+        return [
+            'id' => 'uuid',
+            'code' => 'id',
+            'title' => 'titulo',
+            'director' => 'diretor',
+            'description' => 'sinopse',
+            'release_year' => 'ano_lancamento',
+            'genre' => 'categoria',
+            'quantity' => 'quantidade',
+            'rental_price' => 'valor_aluguel',
+        ];
     }
 }
