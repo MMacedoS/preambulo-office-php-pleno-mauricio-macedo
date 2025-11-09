@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class FilmeObserver
 {
-    use ValidationTrait;
+    use ValidationTrait, CacheTrait;
 
     public function creating(Filme $filme): bool
     {
@@ -37,6 +37,7 @@ class FilmeObserver
 
     public function updated(Filme $filme): void
     {
+        $this->removeCachedObject($filme);
         Log::info('Filme atualizado', [
             'uuid' => $filme->uuid,
             'titulo' => $filme->titulo,
@@ -50,6 +51,7 @@ class FilmeObserver
 
     public function deleted(Filme $filme): void
     {
+        $this->removeCachedObject($filme);
         Log::warning('Filme deletado', [
             'uuid' => $filme->uuid,
             'titulo' => $filme->titulo,

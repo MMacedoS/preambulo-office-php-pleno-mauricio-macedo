@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Entities\Movies;
 
-use App\Models\films\Filme;
+use App\Models\Movies\Filme;
 use App\Repositories\Contracts\Movies\IFilmeRepository;
 use App\Repositories\Traits\SingletonTrait;
 use App\Repositories\Traits\ServiceTrait;
@@ -12,7 +12,12 @@ class FilmeRepository implements IFilmeRepository
 {
     use SingletonTrait, ServiceTrait, CacheTrait;
 
-    public function __construct(protected Filme $model) {}
+    protected $model;
+
+    public function __construct()
+    {
+        $this->model = new Filme();
+    }
 
     public function create(array $data)
     {
@@ -25,6 +30,7 @@ class FilmeRepository implements IFilmeRepository
             if (is_null($filme->id)) {
                 return null;
             }
+            return $filme;
         } catch (\Exception $e) {
             return null;
         }

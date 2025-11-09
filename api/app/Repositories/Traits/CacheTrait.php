@@ -7,8 +7,6 @@ use Carbon\Carbon;
 
 trait CacheTrait
 {
-    protected $model;
-
     public function getFromCacheOrFetch(string $key, \Closure $callback, int $seconds = 0)
     {
         $cached = Cache::get($key);
