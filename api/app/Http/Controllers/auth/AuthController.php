@@ -55,7 +55,7 @@ class AuthController extends Controller
         $success = $this->authRepository->logout($token);
 
         if (!$success) {
-            return response()->json(['message' => 'Token inválido'], 400);
+            return response()->json(['message' => 'Token inválido'], 422);
         }
 
         return response()->json(['message' => 'Logout bem-sucedido']);

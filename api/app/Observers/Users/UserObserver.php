@@ -3,10 +3,13 @@
 namespace App\Observers\Users;
 
 use App\Models\User;
+use App\Repositories\Traits\CacheTrait;
 use Illuminate\Support\Facades\Log;
 
 class UserObserver
 {
+    use CacheTrait;
+
     public function creating(User $user)
     {
         Log::info('Usuário criando', [
@@ -35,6 +38,7 @@ class UserObserver
 
     public function updated(User $user)
     {
+        $this->removeCachedObject($user);
         Log::info('Usuário atualizado', [
             'uuid' => $user->uuid,
             'name' => $user->name,
@@ -51,6 +55,7 @@ class UserObserver
 
     public function deleted(User $user)
     {
+        $this->removeCachedObject($user);
         Log::warning('Usuário deletado', [
             'uuid' => $user->uuid,
             'name' => $user->name,
@@ -68,6 +73,7 @@ class UserObserver
 
     public function forceDeleted(User $user)
     {
+        $this->removeCachedObject($user);
         Log::warning('Usuário deletado permanentemente', [
             'uuid' => $user->uuid,
             'name' => $user->name,

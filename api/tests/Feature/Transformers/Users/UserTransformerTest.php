@@ -24,7 +24,8 @@ class UserTransformerTest extends \Tests\TestCase
         $transformed = $this->transformer->transform($user);
 
         $this->assertIsArray($transformed);
-        $this->assertEquals($user->id, $transformed['id']);
+        $this->assertEquals($user->uuid, $transformed['id']);
+        $this->assertEquals($user->id, $transformed['code']);
         $this->assertEquals($user->name, $transformed['name']);
         $this->assertEquals($user->email, $transformed['email']);
         $this->assertEquals($user->role->value, $transformed['role']);

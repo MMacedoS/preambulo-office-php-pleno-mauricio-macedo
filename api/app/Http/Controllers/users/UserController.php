@@ -53,35 +53,73 @@ class UserController extends Controller
         $user = $this->usuarioRepository->findByUuid($id);
 
         if (is_null($user)) {
-            return response()->json(['message' => 'Usuario não encontrado'], 422);
+            return response()->json(['message' => 'Usuário não encontrado'], 422);
         }
+
+        $user = $this->usuarioTransformer->transform($user);
 
         return response()->json(['data' => $user], 200);
     }
 
     public function store(Request $request)
     {
-        $data = $request->only(['name', 'email', 'password', 'role']);
-        $newUser = $this->usuarioRepository->create($data);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|string|in:administrador,atendente,cliente',
+        ]);
+
+
+        $newUser = $this->usuarioRepository->create($validated);
+
+        if (!$newUser) {
+            return response()->json(['message' => 'Falha ao criar usuario'], 500);
+        }
+
+        $newUser = $this->usuarioTransformer->transform($newUser);
+
         return response()->json(['data' => $newUser], 201);
     }
 
     public function update(Request $request, $id)
     {
-        $data = $request->only(['name', 'email', 'role']);
-        $updatedUser = $this->usuarioRepository->update($id, $data);
-        if (!$updatedUser) {
-            return response()->json(['message' => 'User not found or could not be updated'], 404);
+        $user = $this->usuarioRepository->findByUuid($id);
+
+        if (is_null($user)) {
+            return response()->json(['message' => 'Usuário não encontrado'], 422);
         }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|required|string|min:8',
+            'role' => 'sometimes|required|string|in:administrador,atendente,cliente',
+        ]);
+
+        $updatedUser = $this->usuarioRepository->update($user->id, $validated);
+
+        if (!$updatedUser) {
+            return response()->json(['message' => 'Usuário não encontrado ou não pôde ser atualizado'], 422);
+        }
+
+        $updatedUser = $this->usuarioTransformer->transform($updatedUser);
+
         return response()->json(['data' => $updatedUser], 200);
     }
 
-    public function destroy($id)
+    public function destroy(string $id)
     {
-        $deleted = $this->usuarioRepository->delete($id);
-        if (!$deleted) {
-            return response()->json(['message' => 'User not found or could not be deleted'], 404);
+        $user = $this->usuarioRepository->findByUuid($id);
+        if (is_null($user)) {
+            return response()->json(['message' => 'Usuário não encontrado'], 422);
         }
-        return response()->json(['message' => 'User deleted successfully'], 200);
+
+        $deleted = $this->usuarioRepository->delete($user->id);
+
+        if (!$deleted) {
+            return response()->json(['message' => 'Usuário não encontrado ou não pôde ser deletado'], 422);
+        }
+        return response()->json(['message' => 'Usuário deletado com sucesso'], 204);
     }
 }

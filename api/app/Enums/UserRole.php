@@ -24,6 +24,8 @@ enum UserRole: string
                 'ver_filmes',
                 'criar_aluguel',
                 'ver_meus_alugueis',
+                'ver_perfil',
+                'editar_perfil',
             ],
             self::ATENDENTE => [
                 'ver_filmes',
@@ -32,6 +34,9 @@ enum UserRole: string
                 'ver_clientes',
                 'criar_usuarios',
                 'editar_usuarios',
+                'ver_usuarios',
+                'ver_perfil',
+                'editar_perfil',
             ],
             self::ADMINISTRADOR => [
                 'ver_filmes',
@@ -39,6 +44,9 @@ enum UserRole: string
                 'gerenciar_alugueis',
                 'ver_todos_alugueis',
                 'ver_clientes',
+                'ver_perfil',
+                'ver_usuarios',
+                'editar_perfil',
                 'criar_usuarios',
                 'editar_usuarios',
                 'deletar_usuarios',

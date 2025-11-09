@@ -10,7 +10,8 @@ class UsuarioTransformer
     public function transform(User $usuario)
     {
         return [
-            'id' => $usuario->id,
+            'id' => $usuario->uuid,
+            'code' => $usuario->id,
             'name' => $usuario->name,
             'email' => $usuario->email,
             'role' => $usuario->role->value,
