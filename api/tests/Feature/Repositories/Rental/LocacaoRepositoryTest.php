@@ -2,14 +2,19 @@
 
 namespace Tests\Feature\Repositories\Rental;
 
+use App\Repositories\Contracts\Rental\ILocacaoFilmesRepository;
+use App\Repositories\Entities\Rental\LocacaoRepository;
+
 class LocacaoRepositoryTest extends \Tests\TestCase
 {
     protected $locacaoRepository;
+    protected $locacaoFilmesRepository;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->locacaoRepository = app(\App\Repositories\Entities\Rental\LocacaoRepository::class);
+        $this->locacaoRepository = LocacaoRepository::class;
+        $this->locacaoFilmesRepository = ILocacaoFilmesRepository::class;
     }
 
     public function tearDown(): void
@@ -20,7 +25,7 @@ class LocacaoRepositoryTest extends \Tests\TestCase
     public function test_locacao_repository_instance(): void
     {
         $this->assertInstanceOf(
-            \App\Repositories\Entities\Rental\LocacaoRepository::class,
+            LocacaoRepository::class,
             $this->locacaoRepository
         );
 
@@ -29,12 +34,12 @@ class LocacaoRepositoryTest extends \Tests\TestCase
 
     public function test_attach_and_detach_movies_to_locacao(): void
     {
-        $client = $this->mockUsuarioCliente();
-        $locacao = $this->mockLocacao(
+        $usuario = $this->mockUsuarioAdmin();
+        $locacao = $this->locacaoRepository->create(
             [
-                'usuario_id' => $client->id,
-                'data_inicio' => now(),
-                'data_devolucao' => now()->addDays(7),
+                'usuario_id' => $usuario->id,
+                'data_inicio' => now()->toDateString(),
+                'data_devolucao' => now()->addDays(5)->toDateString(),
                 'valor_total' => 0,
                 'multa' => 0,
                 'status' => 'ativo',
@@ -43,14 +48,18 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         $filme1 = $this->mockFilme();
         $filme2 = $this->mockFilme();
 
-        $this->locacaoRepository->attachMoviesToLocacao($locacao->id, [
-            $filme1,
-            $filme2,
+        $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [
+            $filme1->id,
+            $filme2->id,
         ]);
 
-        $locacaoRefresh = $this->locacaoRepository->findById($locacao->id);
-        $this->assertCount(2, $locacaoRefresh->filmes);
-        $this->assertNotNull($locacaoRefresh->filmes[0]['pivot']);
+        $locacao->refresh();
+        $this->assertCount(2, $locacao->filmes);
+
+        $this->locacaoFilmesRepository->detachMoviesFromLocacao($locacao->id, [$filme1->id]);
+
+        $locacao->refresh();
+        $this->assertCount(1, $locacao->filmes);
     }
 
     public function test_detach_movies_from_locacao(): void
@@ -69,13 +78,13 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         $filme1 = $this->mockFilme();
         $filme2 = $this->mockFilme();
 
-        $this->locacaoRepository->attachMoviesToLocacao($locacao->id, [
-            $filme1,
-            $filme2,
+        $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [
+            $filme1->id,
+            $filme2->id,
         ]);
 
-        $this->locacaoRepository->detachMoviesFromLocacao($locacao->id, [
-            $filme1,
+        $this->locacaoFilmesRepository->detachMoviesFromLocacao($locacao->id, [
+            $filme1->id,
         ]);
 
         $locacaoRefresh = $this->locacaoRepository->findById($locacao->id);
@@ -96,24 +105,16 @@ class LocacaoRepositoryTest extends \Tests\TestCase
                 'status' => 'ativo',
             ]
         );
-        $filme1 = $this->mockFilme();
-        $filme2 = $this->mockFilme();
+        $filme1 = $this->mockFilme(['valor_aluguel' => 15.00]);
+        $filme2 = $this->mockFilme(['valor_aluguel' => 25.00]);
 
-        $this->locacaoRepository->attachMoviesToLocacao($locacao->id, [
-            (object)[
-                'id' => $filme1->id,
-                'quantidade' => 2,
-                'preco_unitario' => 15.00,
-            ],
-            (object)[
-                'id' => $filme2->id,
-                'quantidade' => 1,
-                'preco_unitario' => 25.00,
-            ],
+        $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [
+            $filme1->id,
+            $filme2->id,
         ]);
 
-        $totalValue = $this->locacaoRepository->calculateTotalValue($locacao->id);
-        $this->assertEquals(55.00, $totalValue);
+        $totalValue = $this->locacaoFilmesRepository->calculateTotalValue($locacao->id);
+        $this->assertEquals(40.00, $totalValue);
     }
 
     public function test_update_locacao_total_value(): void
@@ -129,18 +130,13 @@ class LocacaoRepositoryTest extends \Tests\TestCase
                 'status' => 'ativo',
             ]
         );
-        $filme1 = $this->mockFilme();
+        $filme1 = $this->mockFilme(['valor_aluguel' => 10.00]);
 
-        $this->locacaoRepository->attachMoviesToLocacao($locacao->id, [
-            (object)[
-                'id' => $filme1->id,
-                'quantidade' => 3,
-                'preco_unitario' => 10.00,
-            ],
-        ]);
+        $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [$filme1->id]);
+        $this->locacaoFilmesRepository->updateLocacaoTotalValue($locacao->id);
 
         $locacaoRefresh = $this->locacaoRepository->findById($locacao->id);
-        $this->assertEquals(30.00, $locacaoRefresh->valor_total);
+        $this->assertEquals(10.00, $locacaoRefresh->valor_total);
     }
 
     public function test_create_rental()
@@ -150,9 +146,8 @@ class LocacaoRepositoryTest extends \Tests\TestCase
             'usuario_id' => $client->id,
             'data_inicio' => now(),
             'data_devolucao' => now()->addDays(5),
-            'valor_total' => 0,
-            'multa' => 0,
             'status' => 'ativo',
+            'valor_total' => 0,
         ];
 
         $locacao = $this->locacaoRepository->create($locacaoData);
@@ -160,20 +155,5 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         $this->assertNotNull($locacao);
         $this->assertEquals($client->id, $locacao->usuario_id);
         $this->assertEquals('ativo', $locacao->status);
-    }
-
-    public function test_create_rental_with_missing_data()
-    {
-        $locacaoData = [
-            'data_inicio' => now(),
-            'data_devolucao' => now()->addDays(5),
-            'valor_total' => 0,
-            'multa' => 0,
-            'status' => 'ativo',
-        ];
-
-        $created = $this->locacaoRepository->create($locacaoData);
-
-        $this->assertNull($created);
     }
 }

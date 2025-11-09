@@ -89,4 +89,49 @@ class FilmeRepository implements IFilmeRepository
             return false;
         }
     }
+
+    public function findByIdsWithInsufficientStock(array $movieIds): array
+    {
+        return $this->model->whereIn('id', $movieIds)
+            ->where('quantidade', '<=', 0)
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function findAvailableByIds(array $movieIds)
+    {
+        return $this->model->whereIn('id', $movieIds)
+            ->where('quantidade', '>', 0)
+            ->get();
+    }
+
+    public function decrementQuantity(int $filmeId, int $quantidade = 1): bool
+    {
+        try {
+            $filme = $this->findById($filmeId);
+            if (is_null($filme)) {
+                return false;
+            }
+
+            $novaQuantidade = max(0, $filme->quantidade - $quantidade);
+            return (bool) $filme->update(['quantidade' => $novaQuantidade]);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function incrementQuantity(int $filmeId, int $quantidade = 1): bool
+    {
+        try {
+            $filme = $this->findById($filmeId);
+            if (is_null($filme)) {
+                return false;
+            }
+
+            $novaQuantidade = $filme->quantidade + $quantidade;
+            return (bool) $filme->update(['quantidade' => $novaQuantidade]);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

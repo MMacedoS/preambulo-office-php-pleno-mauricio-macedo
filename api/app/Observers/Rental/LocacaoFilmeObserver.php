@@ -3,7 +3,7 @@
 namespace App\Observers\Rental;
 
 use App\Models\Rental\LocacaoFilme;
-use App\Repositories\Entities\Rental\LocacaoRepository;
+use App\Repositories\Entities\Rental\LocacaoFilmesRepository;
 use App\Repositories\Traits\CacheTrait;
 use App\Traits\ValidationTrait;
 
@@ -41,6 +41,11 @@ class LocacaoFilmeObserver
 
     public function deleting(LocacaoFilme $locacaoFilme): bool
     {
+        $filme = $locacaoFilme->filme;
+        if ($filme) {
+            $filme->increment('quantidade', $locacaoFilme->quantidade);
+            $this->removeCachedObject($filme);
+        }
         return true;
     }
 
@@ -77,8 +82,8 @@ class LocacaoFilmeObserver
     private function updateLocacaoTotalValue(LocacaoFilme $locacaoFilme): void
     {
         try {
-            $locacaoRepository = app(LocacaoRepository::class);
-            $locacaoRepository->updateLocacaoTotalValue($locacaoFilme->locacao_id);
+            $locacaoFilmesRepository = app(LocacaoFilmesRepository::class);
+            $locacaoFilmesRepository->updateLocacaoTotalValue($locacaoFilme->locacao_id);
         } catch (\Exception $e) {
         }
     }

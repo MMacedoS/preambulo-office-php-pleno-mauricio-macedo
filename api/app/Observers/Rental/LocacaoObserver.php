@@ -33,7 +33,17 @@ class LocacaoObserver
         $this->removeCachedObject($locacao);
     }
 
-    public function deleting(Locacao $locacao) {}
+    public function deleting(Locacao $locacao)
+    {
+        if ($locacao->filmes()->exists()) {
+            foreach ($locacao->filmes as $filme) {
+                $quantidade = $filme->pivot->quantidade;
+                $filme->increment('quantidade', $quantidade);
+                $this->removeCachedObject($filme);
+            }
+        }
+        return true;
+    }
 
     public function deleted(Locacao $locacao)
     {
@@ -42,7 +52,10 @@ class LocacaoObserver
 
     public function restored(Locacao $locacao) {}
 
-    public function forceDeleted(Locacao $locacao) {}
+    public function forceDeleted(Locacao $locacao)
+    {
+        $this->removeCachedObject($locacao);
+    }
 
     public function isRequired(Locacao $model): bool
     {

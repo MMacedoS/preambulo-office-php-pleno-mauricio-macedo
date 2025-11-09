@@ -10,4 +10,8 @@ interface IFilmeRepository
     public function findAll(array $criteria = [], array $orderBy = [], array $orWhereCriteria = []);
     public function update(int $id, array $data);
     public function delete(int $id);
+    public function findByIdsWithInsufficientStock(array $movieIds): array;
+    public function findAvailableByIds(array $movieIds);
+    public function decrementQuantity(int $filmeId, int $quantidade = 1): bool;
+    public function incrementQuantity(int $filmeId, int $quantidade = 1): bool;
 }

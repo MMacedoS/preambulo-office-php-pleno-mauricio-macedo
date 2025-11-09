@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\users;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\LoadEntityTrait;
 use App\Repositories\Contracts\Users\IUsuarioRepository;
 use App\Repositories\Traits\FilterSearchTrait;
 use App\Transformers\Users\UsuarioTransformer;
@@ -10,7 +11,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    use FilterSearchTrait;
+    use FilterSearchTrait, LoadEntityTrait;
 
     protected IUsuarioRepository $usuarioRepository;
     protected UsuarioTransformer $usuarioTransformer;
@@ -50,6 +51,10 @@ class UserController extends Controller
 
     public function show(Request $request, string $id)
     {
+        if (!$this->isValidUuid($id)) {
+            return response()->json(['message' => 'Usuário não encontrado'], 422);
+        }
+
         $user = $this->usuarioRepository->findByUuid($id);
 
         if (is_null($user)) {
@@ -84,6 +89,10 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!$this->isValidUuid($id)) {
+            return response()->json(['message' => 'Usuário não encontrado'], 422);
+        }
+
         $user = $this->usuarioRepository->findByUuid($id);
 
         if (is_null($user)) {
@@ -110,6 +119,10 @@ class UserController extends Controller
 
     public function destroy(string $id)
     {
+        if (!$this->isValidUuid($id)) {
+            return response()->json(['message' => 'Usuário não encontrado'], 422);
+        }
+
         $user = $this->usuarioRepository->findByUuid($id);
         if (is_null($user)) {
             return response()->json(['message' => 'Usuário não encontrado'], 422);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\movies;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Traits\LoadEntityTrait;
 use App\Repositories\Contracts\Movies\IFilmeRepository;
 use App\Repositories\Traits\FilterSearchTrait;
 use App\Transformers\Movies\FilmeTransformer;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 
 class FilmeController extends Controller
 {
+    use LoadEntityTrait;
+
     protected IFilmeRepository $filmeRepository;
     protected FilmeTransformer $filmeTransformer;
 
@@ -59,7 +62,6 @@ class FilmeController extends Controller
             return response()->json(['message' => 'Falha ao criar filme'], 500);
         }
 
-        // Retornar transformado
         $transformed = $this->filmeTransformer->transform($filme);
 
         return response()->json($transformed, 201);
@@ -67,6 +69,10 @@ class FilmeController extends Controller
 
     public function update(Request $request, string $id)
     {
+        if (!$this->isValidUuid($id)) {
+            return response()->json(['message' => 'Filme não encontrado'], 404);
+        }
+
         $filme = $this->filmeRepository->findByUuid($id);
 
         if (is_null($filme)) {
@@ -97,6 +103,10 @@ class FilmeController extends Controller
 
     public function destroy(string $id)
     {
+        if (!$this->isValidUuid($id)) {
+            return response()->json(['message' => 'Filme não encontrado'], 422);
+        }
+
         $filme = $this->filmeRepository->findByUuid($id);
 
         if (is_null($filme)) {

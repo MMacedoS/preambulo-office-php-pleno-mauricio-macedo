@@ -4,89 +4,25 @@ namespace App\Repositories\Entities\Rental;
 
 use App\Models\Rental\Locacao;
 use App\Repositories\Contracts\Rental\ILocacaoRepository;
+use App\Repositories\Entities\Rental\LocacaoFilmesRepository;
 use App\Repositories\Traits\CacheTrait;
 use App\Repositories\Traits\QueryBuilderTrait;
 use App\Repositories\Traits\ServiceTrait;
 use App\Repositories\Traits\SingletonTrait;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LocacaoRepository implements ILocacaoRepository
 {
     protected $model;
+    protected LocacaoFilmesRepository $locacaoFilmesRepository;
 
     use SingletonTrait, ServiceTrait, CacheTrait, QueryBuilderTrait;
 
-    public function __construct()
+    public function __construct(LocacaoFilmesRepository $locacaoFilmesRepository)
     {
         $this->model = new Locacao();
-    }
-
-    public function attachMoviesToLocacao(string $locacaoId, array $filmes): void
-    {
-        if (empty($filmes)) {
-            return;
-        }
-
-        $locacao = $this->findById($locacaoId);
-        if (is_null($locacao)) {
-            return;
-        }
-
-        foreach ($filmes as $filme) {
-            $quantidade = is_object($filme) ? ($filme->quantidade ?? 1) : ($filme['quantidade'] ?? 1);
-            $preco = is_object($filme) ? ($filme->preco_unitario ?? 0) : ($filme['preco_unitario'] ?? 0);
-
-            $locacao->filmes()->attach(
-                $filme->id,
-                [
-                    'quantidade' => $quantidade,
-                    'preco_unitario' => $preco,
-                ]
-            );
-        }
-
-        $this->updateLocacaoTotalValue($locacaoId);
-    }
-
-    public function detachMoviesFromLocacao(string $locacaoId, array $filmes): void
-    {
-        if (empty($filmes)) {
-            return;
-        }
-
-        $locacao = $this->findById($locacaoId);
-        if (is_null($locacao)) {
-            return;
-        }
-
-        foreach ($filmes as $filme) {
-            $locacao->filmes()->detach($filme->id);
-        }
-
-        // Atualizar valor_total da locação
-        $this->updateLocacaoTotalValue($locacaoId);
-    }
-
-    public function calculateTotalValue(string $locacaoId): float
-    {
-        $locacao = $this->findById($locacaoId);
-        if (is_null($locacao)) {
-            return 0.0;
-        }
-
-        return $locacao->filmes()
-            ->get()
-            ->sum(function ($filme) {
-                return $filme->pivot->quantidade * $filme->pivot->preco_unitario;
-            });
-    }
-
-    public function updateLocacaoTotalValue(string $locacaoId): void
-    {
-        $total = $this->calculateTotalValue($locacaoId);
-        $locacao = $this->findById($locacaoId);
-        if (!is_null($locacao)) {
-            $locacao->update(['valor_total' => $total]);
-        }
+        $this->locacaoFilmesRepository = $locacaoFilmesRepository;
     }
 
     public function findAll(array $criteria = [], array $orderBy = [], array $orWhereCriteria = [])
@@ -111,12 +47,28 @@ class LocacaoRepository implements ILocacaoRepository
         }
 
         try {
-            $locacao = $this->model->create($data);
-            if (is_null($locacao->id)) {
-                return null;
-            }
-            return $locacao;
+            return DB::transaction(function () use ($data) {
+                $movies = $data['filmes'] ?? [];
+                if (isset($data['filmes'])) {
+                    unset($data['filmes']);
+                }
+
+                $data['valor_total'] = $data['valor_total'] ?? 0;
+
+                $locacao = $this->model->create($data);
+                if (is_null($locacao->id)) {
+                    return null;
+                }
+
+                if (!empty($movies)) {
+                    $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, $movies);
+                    $locacao = $this->findById($locacao->id);
+                }
+
+                return $locacao;
+            });
         } catch (\Exception $e) {
+            Log::error('LocacaoRepository::create - Exception: ' . $e->getMessage());
             return null;
         }
     }
@@ -148,11 +100,20 @@ class LocacaoRepository implements ILocacaoRepository
                 return false;
             }
 
+            if ($this->hasRelatedMovies($locacao)) {
+                return false;
+            }
+
             $locacao->delete();
             return $locacao;
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    private function hasRelatedMovies($locacao): bool
+    {
+        return $locacao->filmes()->exists();
     }
 
     public function rentalExpiredsCount(): int

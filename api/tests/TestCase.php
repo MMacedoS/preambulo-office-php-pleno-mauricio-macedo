@@ -21,8 +21,6 @@ abstract class TestCase extends BaseTestCase
             'role' => UserRole::ADMINISTRADOR,
         ]);
 
-        $this->actingAs($user);
-
         return $user;
     }
 
@@ -35,8 +33,6 @@ abstract class TestCase extends BaseTestCase
             'role' => UserRole::ATENDENTE,
         ]);
 
-        $this->actingAs($user);
-
         return $user;
     }
 
@@ -48,7 +44,6 @@ abstract class TestCase extends BaseTestCase
             'password' => bcrypt('password'),
             'role' => UserRole::CLIENTE,
         ]);
-        $this->actingAs($user);
         return $user;
     }
 
