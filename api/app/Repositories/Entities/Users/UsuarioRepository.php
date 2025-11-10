@@ -82,4 +82,10 @@ class UsuarioRepository implements IUsuarioRepository
 
         return false;
     }
+
+
+    public function totalClients(): int
+    {
+        return $this->model->where('role', 'cliente')->count();
+    }
 }

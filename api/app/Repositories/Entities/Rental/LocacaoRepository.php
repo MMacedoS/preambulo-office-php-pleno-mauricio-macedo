@@ -127,14 +127,14 @@ class LocacaoRepository implements ILocacaoRepository
         $now = now();
         return $this->model
             ->where('data_devolucao', '<', $now)
-            ->where('status', 'ativo')
+            ->where('status', self::PENDING_STATUSES)
             ->count();
     }
 
     public function rentalActiveCount(): int
     {
         return $this->model
-            ->where('status', 'ativo')
+            ->where('status', self::ACTIVE_STATUSES)
             ->count();
     }
 

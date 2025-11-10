@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('totals-rentals-active', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsRentals'])->middleware('permission:gerenciar_alugueis');
+    Route::get('totals-late-returns', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsLateReturns'])->middleware('permission:gerenciar_alugueis');
     Route::get('rentals/info-rentals', [\App\Http\Controllers\Rental\LocacaoController::class, 'rentalActiveAndLateReturns']);
-    Route::get('rentals/history', [\App\Http\Controllers\Rental\LocacaoController::class, 'rentalHistory'])->middleware('permission:ver_meus_alugueis');
+    Route::get('rentals/history', [\App\Http\Controllers\Rental\LocacaoController::class, 'rentalHistory'])->middleware('permission:gerenciar_alugueis');
 
     Route::apiResource(
         'rentals',

@@ -165,4 +165,16 @@ class UserController extends Controller
 
         return response()->json(['data' => $updatedUser], 200);
     }
+
+    public function totalClients(Request $request)
+    {
+        $clients = $this->usuarioRepository->totalClients();
+
+        return response()->json(
+            [
+                'data' => ['total_clients' => $clients]
+            ],
+            200
+        );
+    }
 }

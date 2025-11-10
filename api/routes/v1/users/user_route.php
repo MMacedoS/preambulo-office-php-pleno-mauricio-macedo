@@ -11,4 +11,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('api.user.store')->middleware('permission:criar_usuarios');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('api.user.update')->middleware('permission:editar_usuarios');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('api.user.destroy')->middleware('permission:deletar_usuarios');
+    Route::get('/total-clients', [UserController::class, 'totalClients'])->name('api.clients.total')->middleware('permission:ver_usuarios');
 });

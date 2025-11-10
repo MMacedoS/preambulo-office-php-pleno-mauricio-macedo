@@ -248,4 +248,18 @@ class LocacaoController extends Controller
             200
         );
     }
+
+    public function totalsRentals()
+    {
+        $totalActiveRentals = $this->locacaoRepository->rentalActiveCount();
+
+        return response()->json(['total_active_rentals' => $totalActiveRentals], 200);
+    }
+
+    public function totalsLateReturns()
+    {
+        $totalLateReturns = $this->locacaoRepository->rentalExpiredsCount();
+
+        return response()->json(['total_late_returns' => $totalLateReturns], 200);
+    }
 }
