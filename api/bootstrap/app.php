@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withSchedule(function ($schedule) {
         $schedule->command(\App\Console\Commands\ProcessExpiredRentalsCommand::class)
-            ->everyMinute()
+            ->daily()
             ->withoutOverlapping()
             ->onSuccess(function () {
                 \Illuminate\Support\Facades\Log::info('Comando de processamento de locações expiradas executado com sucesso');

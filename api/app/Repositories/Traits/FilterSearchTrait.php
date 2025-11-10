@@ -10,6 +10,12 @@ trait FilterSearchTrait
             'title' => 'titulo',
             'name' => 'name',
             'email' => 'email',
+            'status' => 'status',
+            'user_id' => 'usuario_id',
+            'movie_id' => 'filme_id',
+            'rental_date' => 'data_inicio',
+            'return_date' => 'data_devolucao',
+            'code' => 'id'
         ];
 
         $mapping = array_merge($defaultMapping, $fieldMapping);
