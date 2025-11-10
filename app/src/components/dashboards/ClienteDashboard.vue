@@ -178,6 +178,11 @@
               </button>
             </div>
 
+            <RentalsFilter
+              @apply="handleApplyFilters"
+              @reset="handleResetFilters"
+            />
+
             <Accordion :items="historyItems">
               <template #header="{ item }">
                 <div class="flex items-center justify-between w-full gap-4">
@@ -279,6 +284,7 @@ import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import apiClient from "@/services/apiClient";
 import Accordion from "@/components/shared/Accordion.vue";
+import RentalsFilter from "@/components/shared/RentalsFilter.vue";
 
 const router = useRouter();
 const { state, logout } = useAuth();
@@ -292,6 +298,7 @@ const showRentalsHistory = ref(false);
 const rentalsHistory = ref([]);
 const historyMeta = ref(null);
 const currentHistoryPage = ref(1);
+const currentFilters = ref({});
 
 const accordionItems = computed(() =>
   rentals.value.map((rental) => ({
@@ -347,9 +354,11 @@ const loadRentals = async () => {
 
 const loadRentalsHistory = async (page = 1) => {
   try {
-    const response = await apiClient.get("rentals/history", {
-      params: { page },
-    });
+    const params = {
+      page,
+      ...currentFilters.value,
+    };
+    const response = await apiClient.get("rentals/history", { params });
     rentalsHistory.value = response.data.data || [];
     historyMeta.value = response.data.meta || null;
     currentHistoryPage.value = page;
@@ -365,6 +374,18 @@ const handleLogout = async () => {
 
 const handleShowHistory = () => {
   showRentalsHistory.value = true;
+  loadRentalsHistory(1);
+};
+
+const handleApplyFilters = (filters) => {
+  currentFilters.value = Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value)
+  );
+  loadRentalsHistory(1);
+};
+
+const handleResetFilters = () => {
+  currentFilters.value = {};
   loadRentalsHistory(1);
 };
 
