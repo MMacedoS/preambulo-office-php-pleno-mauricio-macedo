@@ -1,7 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-8">
+  <div class="min-h-screen bg-linear-to-br from-blue-50 to-blue-100 p-8">
     <div class="max-w-7xl mx-auto">
-      <template v-if="!showDetails">
+      <template v-if="showCatalog">
+        <CatalogoDashboard @back="showCatalog = false" />
+      </template>
+      <template v-else-if="!showDetails">
         <div class="flex justify-between items-center mb-8">
           <div>
             <h1 class="text-4xl font-bold text-gray-800">
@@ -24,6 +27,7 @@
               Visualize nossos filmes disponíveis
             </p>
             <button
+              @click="showCatalog = true"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
             >
               Ver Catálogo
@@ -158,7 +162,7 @@
 
       <template v-if="showRentalsHistory">
         <div
-          class="fixed inset-0 bg-gradient-to-br from-blue-50 to-blue-100 p-8 z-40 overflow-y-auto"
+          class="fixed inset-0 bg-linear-to-br from-blue-50 to-blue-100 p-8 z-40 overflow-y-auto"
         >
           <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-8">
@@ -285,6 +289,7 @@ import { useAuth } from "@/composables/useAuth";
 import apiClient from "@/services/apiClient";
 import Accordion from "@/components/shared/Accordion.vue";
 import RentalsFilter from "@/components/shared/RentalsFilter.vue";
+import CatalogoDashboard from "@/components/dashboards/CatalogoDashboard.vue";
 
 const router = useRouter();
 const { state, logout } = useAuth();
@@ -295,6 +300,7 @@ const lateRentalsCount = ref(0);
 const rentals = ref([]);
 const showDetails = ref(false);
 const showRentalsHistory = ref(false);
+const showCatalog = ref(false);
 const rentalsHistory = ref([]);
 const historyMeta = ref(null);
 const currentHistoryPage = ref(1);

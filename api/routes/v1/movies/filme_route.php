@@ -13,4 +13,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::delete('/movies/{id}', [FilmeController::class, 'destroy'])->name('api.movies.destroy')
         ->middleware('permission:gerenciar_filmes');
+
+    Route::get('/movies/catalog', [FilmeController::class, 'index'])->name('api.movies.catalog');
 });
