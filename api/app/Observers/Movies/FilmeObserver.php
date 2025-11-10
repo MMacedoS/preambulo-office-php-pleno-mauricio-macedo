@@ -18,7 +18,11 @@ class FilmeObserver
         return true;
     }
 
-    public function created(Filme $filme): void {}
+    public function created(Filme $filme): void
+    {
+        $this->removeCachedObject($filme);
+        $this->removeAllCacheByTable('filmes');
+    }
 
     public function updating(Filme $filme): bool
     {
@@ -31,6 +35,7 @@ class FilmeObserver
     public function updated(Filme $filme): void
     {
         $this->removeCachedObject($filme);
+        $this->removeAllCacheByTable('filmes');
     }
 
     public function deleting(Filme $filme): bool
@@ -41,6 +46,7 @@ class FilmeObserver
     public function deleted(Filme $filme): void
     {
         $this->removeCachedObject($filme);
+        $this->removeAllCacheByTable('filmes');
     }
 
     public function restored(Filme $filme): void {}
@@ -48,6 +54,7 @@ class FilmeObserver
     public function forceDeleted(Filme $filme): void
     {
         $this->removeCachedObject($filme);
+        $this->removeAllCacheByTable('filmes');
     }
 
     public function isRequired(Filme $model): bool

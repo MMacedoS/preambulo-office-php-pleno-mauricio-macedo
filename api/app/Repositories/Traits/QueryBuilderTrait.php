@@ -30,6 +30,6 @@ trait QueryBuilderTrait
 
     protected function makeCacheKey(...$params)
     {
-        return $this->model->getTable() . '_all_' . md5(json_encode($params));
+        return $this->model->getTable() . '_all';
     }
 }

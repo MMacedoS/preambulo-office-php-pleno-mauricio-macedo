@@ -24,10 +24,10 @@ trait CacheTrait
         return $data;
     }
 
-    public function deleteFromCacheById(int $id)
+    public function deleteFromCacheByIdAndModel(string $modelTable, int $id)
     {
         $this->removeCachedItem(
-            $this->model->getTable() . "_" . $id
+            $modelTable . "_" . $id
         );
     }
 
@@ -36,12 +36,9 @@ trait CacheTrait
         $this->forgetClassObjects($this->model);
     }
 
-    public function rememberForeverCachedModel($model, \Closure $closure)
+    public function removeCachedItem(string $key)
     {
-        $this->storeObjectKey($model);
-        $key = $this->setKeyName($model);
-
-        return Cache::rememberForever($key, $closure);
+        Cache::forget($key);
     }
 
     public function removeCachedObject(object $model)
@@ -49,9 +46,10 @@ trait CacheTrait
         Cache::forget($this->setKeyName($model));
     }
 
-    public function removeCachedItem(string $key)
+    public function removeAllCacheByTable(string $tableName)
     {
-        Cache::forget($key);
+        Cache::forget($tableName . '_all');
+        Cache::forget($tableName . '_cached_ids');
     }
 
     private function forgetClassObjects(object $model)
@@ -120,16 +118,6 @@ trait CacheTrait
         return Cache::get($this->setKeyName($object));
     }
 
-    public function getCachedObjects(array $objects)
-    {
-        $arrayKeys = array_map(
-            fn($obj) => $this->setKeyName($obj),
-            $objects
-        );
-
-        return Cache::many($arrayKeys);
-    }
-
     public function setCachedObject(object $model, int $seconds = 0)
     {
         $this->storeObjectKey($model);
@@ -142,11 +130,6 @@ trait CacheTrait
         }
     }
 
-    public function retrieveCachedObject(object $object)
-    {
-        return Cache::pull($this->setKeyName($object));
-    }
-
     public function hasCachedObject(object $object)
     {
         return Cache::has($this->setKeyName($object));
@@ -157,11 +140,6 @@ trait CacheTrait
         return Cache::get($key);
     }
 
-    public function getCachedItems(array $keys)
-    {
-        return Cache::many($keys);
-    }
-
     public function setCachedItem($key, $value, int $seconds = 0)
     {
         if ($seconds != 0) {
@@ -170,11 +148,6 @@ trait CacheTrait
         } else {
             Cache::forever($key, $value);
         }
-    }
-
-    public function retrieveCachedItem(string $key)
-    {
-        return Cache::pull($key);
     }
 
     public function hasCachedItem($key)

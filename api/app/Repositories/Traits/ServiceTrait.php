@@ -15,7 +15,7 @@ trait ServiceTrait
         return $this->getFromCacheOrFetch(
             $cacheKey,
             fn() => $this->model->find($id),
-            3600
+            300
         );
     }
 
@@ -57,7 +57,7 @@ trait ServiceTrait
         return $this->getFromCacheOrFetch(
             $cacheKey,
             fn() => $this->model->where('uuid', $uuid)->first(),
-            3600
+            300
         );
     }
 

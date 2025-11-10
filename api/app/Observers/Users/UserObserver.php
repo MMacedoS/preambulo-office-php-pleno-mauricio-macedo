@@ -11,13 +11,18 @@ class UserObserver
 
     public function creating(User $user) {}
 
-    public function created(User $user) {}
+    public function created(User $user)
+    {
+        $this->removeCachedObject($user);
+        $this->removeAllCacheByTable('users');
+    }
 
     public function updating(User $user) {}
 
     public function updated(User $user)
     {
         $this->removeCachedObject($user);
+        $this->removeAllCacheByTable('users');
     }
 
     public function deleting(User $user) {}
@@ -25,6 +30,7 @@ class UserObserver
     public function deleted(User $user)
     {
         $this->removeCachedObject($user);
+        $this->removeAllCacheByTable('users');
     }
 
     public function restored(User $user) {}
@@ -32,5 +38,6 @@ class UserObserver
     public function forceDeleted(User $user)
     {
         $this->removeCachedObject($user);
+        $this->removeAllCacheByTable('users');
     }
 }

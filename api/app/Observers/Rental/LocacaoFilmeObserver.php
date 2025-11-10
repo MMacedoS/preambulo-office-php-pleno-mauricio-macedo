@@ -36,6 +36,7 @@ class LocacaoFilmeObserver
     public function updated(LocacaoFilme $locacaoFilme): void
     {
         $this->removeCachedObject($locacaoFilme);
+        $this->removeAllCacheByTable('locacao_filmes');
         $this->updateLocacaoTotalValue($locacaoFilme);
     }
 
@@ -45,6 +46,7 @@ class LocacaoFilmeObserver
         if ($filme) {
             $filme->increment('quantidade', $locacaoFilme->quantidade);
             $this->removeCachedObject($filme);
+            $this->removeAllCacheByTable('filmes');
         }
         return true;
     }
@@ -52,6 +54,7 @@ class LocacaoFilmeObserver
     public function deleted(LocacaoFilme $locacaoFilme): void
     {
         $this->removeCachedObject($locacaoFilme);
+        $this->removeAllCacheByTable('locacao_filmes');
         $this->updateLocacaoTotalValue($locacaoFilme);
     }
 
@@ -63,6 +66,7 @@ class LocacaoFilmeObserver
     public function forceDeleted(LocacaoFilme $locacaoFilme): void
     {
         $this->removeCachedObject($locacaoFilme);
+        $this->removeAllCacheByTable('locacao_filmes');
         $this->updateLocacaoTotalValue($locacaoFilme);
     }
 

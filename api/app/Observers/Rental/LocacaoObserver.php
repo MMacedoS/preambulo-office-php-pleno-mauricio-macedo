@@ -39,10 +39,12 @@ class LocacaoObserver
                 $quantidade = $filme->pivot->quantidade;
                 $filme->increment('quantidade', $quantidade);
                 $this->removeCachedObject($filme);
+                $this->removeAllCacheByTable('filmes');
             }
         }
 
         $this->removeCachedObject($locacao);
+        $this->removeAllCacheByTable('locacaos');
     }
 
     public function deleting(Locacao $locacao)
@@ -52,6 +54,7 @@ class LocacaoObserver
                 $quantidade = $filme->pivot->quantidade;
                 $filme->increment('quantidade', $quantidade);
                 $this->removeCachedObject($filme);
+                $this->removeAllCacheByTable('filmes');
             }
         }
         return true;
@@ -60,6 +63,7 @@ class LocacaoObserver
     public function deleted(Locacao $locacao)
     {
         $this->removeCachedObject($locacao);
+        $this->removeAllCacheByTable('locacaos');
     }
 
     public function restored(Locacao $locacao) {}
@@ -67,6 +71,7 @@ class LocacaoObserver
     public function forceDeleted(Locacao $locacao)
     {
         $this->removeCachedObject($locacao);
+        $this->removeAllCacheByTable('locacaos');
     }
 
     public function isRequired(Locacao $model): bool

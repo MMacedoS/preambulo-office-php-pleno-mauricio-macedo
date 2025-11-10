@@ -45,7 +45,7 @@ class UsuarioRepository implements IUsuarioRepository
         return $this->getFromCacheOrFetch(
             $cacheKey,
             fn() => $this->buildQuery($criteria, $orderBy, $orWhereCriteria)->get(),
-            1800
+            300
         );
     }
 
