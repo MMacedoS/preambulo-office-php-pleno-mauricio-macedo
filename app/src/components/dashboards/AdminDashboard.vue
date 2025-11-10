@@ -507,7 +507,10 @@
           </div>
         </div>
 
-        <div v-if="activeTab === 'locacoes'" class="bg-white rounded-lg shadow-lg p-6">
+        <div
+          v-if="activeTab === 'locacoes'"
+          class="bg-white rounded-lg shadow-lg p-6"
+        >
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-gray-800">Locações</h2>
             <button
@@ -533,33 +536,63 @@
             <table class="w-full">
               <thead>
                 <tr class="border-b border-gray-300">
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Cliente</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Filme</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Data Início</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Data Fim</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                  <th class="text-center py-3 px-4 font-semibold text-gray-700">Ações</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Cliente
+                  </th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Filme
+                  </th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Data Início
+                  </th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Data Retorno
+                  </th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Status
+                  </th>
+                  <th class="text-center py-3 px-4 font-semibold text-gray-700">
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="rentals.length === 0" class="text-center">
-                  <td colspan="6" class="py-6 text-gray-500">Nenhuma locação encontrada</td>
+                  <td colspan="6" class="py-6 text-gray-500">
+                    Nenhuma locação encontrada
+                  </td>
                 </tr>
-                <tr v-for="rental in rentals" :key="rental.id" class="border-b border-gray-200 hover:bg-gray-50">
-                  <td class="py-3 px-4">{{ rental.user?.name || 'N/A' }}</td>
-                  <td class="py-3 px-4">{{ rental.movie?.title || 'N/A' }}</td>
-                  <td class="py-3 px-4">{{ formatDate(rental.rental_date) }}</td>
-                  <td class="py-3 px-4">{{ formatDate(rental.return_date) }}</td>
+                <tr
+                  v-for="rental in rentals"
+                  :key="rental.id"
+                  class="border-b border-gray-200 hover:bg-gray-50"
+                >
+                  <td class="py-3 px-4">{{ rental.client?.name || "N/A" }}</td>
+                  <td class="py-3 px-4">{{ rental.movies? || "N/A" }}</td>
+                  <td class="py-3 px-4">
+                    {{ formatDate(rental.rental_date) }}
+                  </td>
+                  <td class="py-3 px-4">
+                    {{ formatDate(rental.return_date) }}
+                  </td>
                   <td class="py-3 px-4">
                     <span
                       class="inline-block px-3 py-1 rounded-full text-xs font-semibold"
                       :class="{
-                        'bg-green-100 text-green-800': rental.status === 'returned',
-                        'bg-yellow-100 text-yellow-800': rental.status === 'active',
-                        'bg-red-100 text-red-800': rental.status === 'late',
+                        'bg-green-100 text-green-800':
+                          rental.status === 'devolvido',
+                        'bg-yellow-100 text-yellow-800':
+                          rental.status === 'ativo',
+                        'bg-red-100 text-red-800': rental.status === 'atrasado',
                       }"
                     >
-                      {{ rental.status === 'returned' ? 'Devolvido' : rental.status === 'active' ? 'Ativo' : 'Atrasado' }}
+                      {{
+                        rental.status === "devolvido"
+                          ? "Devolvido"
+                          : rental.status === "ativo"
+                          ? "Ativo"
+                          : "Atrasado"
+                      }}
                     </span>
                   </td>
                   <td class="py-3 px-4 text-center">
@@ -569,8 +602,14 @@
                         title="Editar"
                         class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg"
                       >
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        <svg
+                          class="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                          />
                         </svg>
                       </button>
                       <button
@@ -578,8 +617,16 @@
                         title="Remover"
                         class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg"
                       >
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        <svg
+                          class="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clip-rule="evenodd"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -710,19 +757,27 @@
     >
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Cliente</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Cliente</label
+          >
           <select
             v-model.number="selectedRental.user_id"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">Selecione um cliente</option>
-            <option v-for="client in clients" :key="client.id" :value="client.id">
+            <option
+              v-for="client in clients"
+              :key="client.id"
+              :value="client.id"
+            >
               {{ client.name }}
             </option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Filme</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Filme</label
+          >
           <select
             v-model.number="selectedRental.movie_id"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -734,7 +789,9 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Data de Início</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Data de Início</label
+          >
           <input
             v-model="selectedRental.rental_date"
             type="date"
@@ -742,7 +799,9 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Data de Retorno</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Data de Retorno</label
+          >
           <input
             v-model="selectedRental.return_date"
             type="date"
@@ -750,7 +809,9 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Status</label
+          >
           <select
             v-model="selectedRental.status"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
