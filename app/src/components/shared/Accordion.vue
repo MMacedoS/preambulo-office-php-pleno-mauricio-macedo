@@ -54,10 +54,9 @@ defineProps({
 const openItems = ref([]);
 
 const toggleItem = (index) => {
-  if (openItems.value.includes(index)) {
-    openItems.value = openItems.value.filter((i) => i !== index);
-  } else {
-    openItems.value.push(index);
-  }
+  const isOpen = openItems.value.includes(index);
+  openItems.value = isOpen
+    ? openItems.value.filter((i) => i !== index)
+    : [...openItems.value, index];
 };
 </script>
