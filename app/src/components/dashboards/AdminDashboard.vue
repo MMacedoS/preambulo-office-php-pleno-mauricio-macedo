@@ -91,6 +91,24 @@
               Filmes
             </div>
           </button>
+          <button
+            @click="activeTab = 'locacoes'"
+            :class="[
+              'flex-1 py-4 px-6 font-semibold text-center transition-all',
+              activeTab === 'locacoes'
+                ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50'
+                : 'text-gray-600 hover:text-gray-800',
+            ]"
+          >
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                />
+              </svg>
+              Locações
+            </div>
+          </button>
         </div>
       </div>
 
@@ -488,6 +506,111 @@
             </div>
           </div>
         </div>
+
+        <div v-if="activeTab === 'locacoes'" class="bg-white rounded-lg shadow-lg p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">Locações</h2>
+            <button
+              @click="openNewRentalModal"
+              class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            >
+              <span>+</span>
+              Nova Locação
+            </button>
+          </div>
+
+          <div class="mb-6">
+            <input
+              v-model="searchRentalsQuery"
+              @input="debounceSearchRentals"
+              type="text"
+              placeholder="Buscar por cliente..."
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-300">
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Cliente</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Filme</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Data Início</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Data Fim</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                  <th class="text-center py-3 px-4 font-semibold text-gray-700">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="rentals.length === 0" class="text-center">
+                  <td colspan="6" class="py-6 text-gray-500">Nenhuma locação encontrada</td>
+                </tr>
+                <tr v-for="rental in rentals" :key="rental.id" class="border-b border-gray-200 hover:bg-gray-50">
+                  <td class="py-3 px-4">{{ rental.user?.name || 'N/A' }}</td>
+                  <td class="py-3 px-4">{{ rental.movie?.title || 'N/A' }}</td>
+                  <td class="py-3 px-4">{{ formatDate(rental.rental_date) }}</td>
+                  <td class="py-3 px-4">{{ formatDate(rental.return_date) }}</td>
+                  <td class="py-3 px-4">
+                    <span
+                      class="inline-block px-3 py-1 rounded-full text-xs font-semibold"
+                      :class="{
+                        'bg-green-100 text-green-800': rental.status === 'returned',
+                        'bg-yellow-100 text-yellow-800': rental.status === 'active',
+                        'bg-red-100 text-red-800': rental.status === 'late',
+                      }"
+                    >
+                      {{ rental.status === 'returned' ? 'Devolvido' : rental.status === 'active' ? 'Ativo' : 'Atrasado' }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <div class="flex gap-2 justify-center">
+                      <button
+                        @click="editRental(rental)"
+                        title="Editar"
+                        class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg"
+                      >
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+                      <button
+                        @click="deleteRental(rental.id)"
+                        title="Remover"
+                        class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg"
+                      >
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-6 flex justify-between items-center">
+            <p class="text-sm text-gray-600">
+              Página {{ currentRentalsPage }} de {{ totalRentalsPages }}
+            </p>
+            <div class="flex gap-2">
+              <button
+                @click="previousRentalsPage"
+                :disabled="currentRentalsPage === 1"
+                class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button
+                @click="nextRentalsPage"
+                :disabled="currentRentalsPage === totalRentalsPages"
+                class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próximo
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -579,6 +702,80 @@
         </div>
       </div>
     </Modal>
+
+    <Modal
+      :isOpen="showRentalFormModal"
+      :title="rentalFormMode === 'create' ? 'Nova Locação' : 'Editar Locação'"
+      @close="handleRentalFormClose"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Cliente</label>
+          <select
+            v-model.number="selectedRental.user_id"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="">Selecione um cliente</option>
+            <option v-for="client in clients" :key="client.id" :value="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Filme</label>
+          <select
+            v-model.number="selectedRental.movie_id"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="">Selecione um filme</option>
+            <option v-for="movie in movies" :key="movie.id" :value="movie.id">
+              {{ movie.title }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Data de Início</label>
+          <input
+            v-model="selectedRental.rental_date"
+            type="date"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Data de Retorno</label>
+          <input
+            v-model="selectedRental.return_date"
+            type="date"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+          <select
+            v-model="selectedRental.status"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="active">Ativo</option>
+            <option value="returned">Devolvido</option>
+            <option value="late">Atrasado</option>
+          </select>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button
+            @click="handleRentalFormClose"
+            class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="handleRentalFormSubmit(selectedRental)"
+            class="px-4 py-2 text-white bg-orange-600 hover:bg-orange-700 rounded-lg"
+          >
+            Salvar
+          </button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -629,6 +826,15 @@ const showMovieFormModal = ref(false);
 const movieFormMode = ref("create");
 const selectedMovie = ref(null);
 
+const rentals = ref([]);
+const searchRentalsQuery = ref("");
+const currentRentalsPage = ref(1);
+const totalRentalsPages = ref(1);
+const perPageRentals = ref(10);
+const showRentalFormModal = ref(false);
+const rentalFormMode = ref("create");
+const selectedRental = ref(null);
+
 const loadTotalRevenue = async () => {
   try {
     const response = await apiClient.get("totals-revenue");
@@ -659,6 +865,11 @@ const loadPendingPenalties = async () => {
 const handleLogout = async () => {
   await logout();
   router.push("/login");
+};
+
+const formatDate = (date) => {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString("pt-BR");
 };
 
 const loadUsers = async (page = 1, search = "") => {
@@ -950,6 +1161,110 @@ const handleMovieFormError = ({ message }) => {
   console.error("Erro no formulário:", message);
 };
 
+const loadRentals = async (page = 1, search = "") => {
+  try {
+    const params = {
+      page: page,
+      per_page: perPageRentals.value,
+    };
+
+    if (search) {
+      params.user_name = search;
+    }
+
+    const response = await apiClient.get("rentals", { params });
+
+    rentals.value = response.data.data || [];
+    currentRentalsPage.value = response.data.meta?.current_page || 1;
+    totalRentalsPages.value = response.data.meta?.last_page || 1;
+    perPageRentals.value = response.data.meta?.per_page || 10;
+  } catch (error) {
+    console.error("Erro ao carregar locações:", error);
+    rentals.value = [];
+  }
+};
+
+let searchRentalsTimeout = null;
+
+const debounceSearchRentals = () => {
+  clearTimeout(searchRentalsTimeout);
+  searchRentalsTimeout = setTimeout(() => {
+    currentRentalsPage.value = 1;
+    loadRentals(1, searchRentalsQuery.value);
+  }, 500);
+};
+
+const previousRentalsPage = () => {
+  if (currentRentalsPage.value > 1) {
+    currentRentalsPage.value--;
+    loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
+  }
+};
+
+const nextRentalsPage = () => {
+  if (currentRentalsPage.value < totalRentalsPages.value) {
+    currentRentalsPage.value++;
+    loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
+  }
+};
+
+const openNewRentalModal = () => {
+  rentalFormMode.value = "create";
+  selectedRental.value = null;
+  showRentalFormModal.value = true;
+};
+
+const editRental = (rental) => {
+  rentalFormMode.value = "edit";
+  selectedRental.value = rental;
+  showRentalFormModal.value = true;
+};
+
+const deleteRental = async (rentalId) => {
+  if (confirm("Tem certeza que deseja remover esta locação?")) {
+    try {
+      await apiClient.delete(`rentals/${rentalId}`);
+      alert("Locação removida com sucesso");
+      loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
+    } catch (error) {
+      console.error("Erro ao remover locação:", error);
+      alert("Erro ao remover locação");
+    }
+  }
+};
+
+const handleRentalFormClose = () => {
+  showRentalFormModal.value = false;
+  selectedRental.value = null;
+  rentalFormMode.value = "create";
+};
+
+const handleRentalFormSubmit = async (data) => {
+  try {
+    if (rentalFormMode.value === "create") {
+      await apiClient.post("rentals", data);
+      alert("Locação criada com sucesso");
+    } else {
+      await apiClient.put(`rentals/${data.id}`, data);
+      alert("Locação atualizada com sucesso");
+    }
+    loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
+    handleRentalFormClose();
+  } catch (error) {
+    console.error("Erro ao salvar locação:", error);
+    alert("Erro ao salvar locação");
+  }
+};
+
+const handleRentalFormSuccess = ({ message }) => {
+  loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
+  handleRentalFormClose();
+};
+
+const handleRentalFormError = ({ message }) => {
+  console.error("Erro no formulário:", message);
+};
+
 onMounted(() => {
   loadTotalRevenue();
   loadLateReturns();
@@ -957,5 +1272,6 @@ onMounted(() => {
   loadUsers();
   loadClients();
   loadMovies();
+  loadRentals();
 });
 </script>
