@@ -16,29 +16,23 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow p-6">
           <p class="text-gray-600 text-sm">Faturamento Total</p>
           <p class="text-3xl font-bold text-blue-600">
-            R$ {{ stats.faturamentoTotal }}
+            R$ {{ parseFloat(totalRevenue).toFixed(2) }}
           </p>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
           <p class="text-gray-600 text-sm">Aluguéis Atrasados</p>
           <p class="text-3xl font-bold text-red-600">
-            {{ stats.alugueisAtrasados }}
-          </p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <p class="text-gray-600 text-sm">Filmes sem Estoque</p>
-          <p class="text-3xl font-bold text-yellow-600">
-            {{ stats.filmesSemEstoque }}
+            {{ lateReturns }}
           </p>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
           <p class="text-gray-600 text-sm">Multas Pendentes</p>
           <p class="text-3xl font-bold text-orange-600">
-            R$ {{ stats.multasPendentes }}
+            R$ {{ parseFloat(pendingPenalties).toFixed(2) }}
           </p>
         </div>
       </div>
@@ -85,23 +79,54 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
+import apiClient from "@/services/apiClient";
 
 const router = useRouter();
 const { state, logout } = useAuth();
 const user = state.user;
 
-const stats = ref({
-  faturamentoTotal: 15320.5,
-  alugueisAtrasados: 5,
-  filmesSemEstoque: 3,
-  multasPendentes: 450.5,
-});
+const totalRevenue = ref(0);
+const lateReturns = ref(0);
+const pendingPenalties = ref(0);
+
+const loadTotalRevenue = async () => {
+  try {
+    const response = await apiClient.get("totals-revenue");
+    totalRevenue.value = response.data.total_revenue || 0;
+  } catch (error) {
+    console.error("Erro ao carregar faturamento total:", error);
+  }
+};
+
+const loadLateReturns = async () => {
+  try {
+    const response = await apiClient.get("totals-late-returns");
+    lateReturns.value = response.data.total_late_returns || 0;
+  } catch (error) {
+    console.error("Erro ao carregar aluguéis atrasados:", error);
+  }
+};
+
+const loadPendingPenalties = async () => {
+  try {
+    const response = await apiClient.get("totals-pending");
+    pendingPenalties.value = response.data.total_pending || 0;
+  } catch (error) {
+    console.error("Erro ao carregar multas pendentes:", error);
+  }
+};
 
 const handleLogout = async () => {
   await logout();
   router.push("/login");
 };
+
+onMounted(() => {
+  loadTotalRevenue();
+  loadLateReturns();
+  loadPendingPenalties();
+});
 </script>
