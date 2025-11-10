@@ -137,10 +137,15 @@ class LocacaoControllerTest extends \Tests\TestCase
             $this->getAuthHeaders($client)
         )->postJson('/api/v1/rentals', $payload);
 
-        $response->assertStatus(403);
-        $response->assertJson([
-            'error' => 'Acesso negado'
-        ]);
+        $response->assertStatus(201);
+        $responseData = $response->json('data');
+        $this->assertArrayHasKey('id', $responseData);
+        $this->assertArrayHasKey('code', $responseData);
+        $this->assertEquals($client->uuid, $responseData['client']['id']);
+        $this->assertCount(2, $responseData['movies']);
+        $this->assertEquals('ativo', $responseData['status']);
+        $expectedTotal = $filme1->valor_aluguel + $filme2->valor_aluguel;
+        $this->assertEqualsWithDelta($expectedTotal, $responseData['total_value'], 0.01);
     }
 
     public function test_create_locacao_endpoint_with_insufficient_movie_stock(): void

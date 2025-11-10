@@ -25,16 +25,23 @@ trait FilterSearchTrait
         $orWhere = [];
 
         foreach ($filters as $field => $value) {
-            if (isset($mapping[$field]) && in_array($field, ['title', 'name', 'email'])) {
+            if (isset($mapping[$field]) && $field === 'name') {
+                $criteria[$mapping[$field]] = $value;
+                continue;
+            }
+
+            if (isset($mapping[$field]) && in_array($field, ['title', 'email'])) {
                 $orWhere[] = [
                     'field' => $mapping[$field],
                     'operator' => 'like',
                     'value' => "%{$value}%"
                 ];
+                continue;
             }
 
             if (isset($mapping[$field]) && !in_array($field, ['title', 'name', 'email'])) {
                 $criteria[$mapping[$field]] = $value;
+                continue;
             }
 
             if (!isset($mapping[$field])) {

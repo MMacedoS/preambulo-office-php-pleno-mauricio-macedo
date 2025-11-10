@@ -10,11 +10,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('totals-revenue', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsRevenue'])->middleware('role:administrador');
     Route::get('totals-pending', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsPending'])->middleware('role:administrador');
 
-    Route::apiResource(
-        'rentals',
-        \App\Http\Controllers\Rental\LocacaoController::class
-    )
-        ->middleware('permission:gerenciar_alugueis');
+    Route::get('rentals', [\App\Http\Controllers\Rental\LocacaoController::class, 'index'])->middleware('permission:ver_todos_alugueis');
+    Route::get('rentals/{rental}', [\App\Http\Controllers\Rental\LocacaoController::class, 'show'])->middleware('permission:ver_todos_alugueis');
+    Route::post('rentals', [\App\Http\Controllers\Rental\LocacaoController::class, 'store']);
+    Route::put('rentals/{rental}', [\App\Http\Controllers\Rental\LocacaoController::class, 'update'])->middleware('permission:gerenciar_alugueis');
+    Route::delete('rentals/{rental}', [\App\Http\Controllers\Rental\LocacaoController::class, 'destroy'])->middleware('permission:gerenciar_alugueis');
 
     Route::post(
         'rentals/{rental}/attach-movies',

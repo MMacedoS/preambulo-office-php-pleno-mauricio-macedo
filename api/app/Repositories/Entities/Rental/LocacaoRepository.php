@@ -27,9 +27,49 @@ class LocacaoRepository implements ILocacaoRepository
         $this->locacaoFilmesRepository = $locacaoFilmesRepository;
     }
 
+    protected function buildQuery(array $criteria, array $orderBy, array $orWhereCriteria)
+    {
+        $query = $this->model->newQuery();
+        $hasJoin = false;
+
+        foreach ($criteria as $field => $value) {
+            if ($field === 'name') {
+                $query->join('users', 'locacoes.usuario_id', '=', 'users.id')
+                    ->where('users.name', 'like', '%' . $value . '%');
+                $hasJoin = true;
+                continue;
+            }
+
+            $query->where($field, '=', $value);
+        }
+
+        if (!empty($orWhereCriteria)) {
+            $query->where(function ($q) use ($orWhereCriteria) {
+                foreach ($orWhereCriteria as $index => $condition) {
+                    $method = $index === 0 ? 'where' : 'orWhere';
+                    $q->{$method}($condition['field'], $condition['operator'], $condition['value']);
+                }
+            });
+        }
+
+        foreach ($orderBy as $field => $direction) {
+            $query->orderBy($hasJoin ? 'locacoes.' . $field : $field, $direction);
+        }
+
+        if ($hasJoin) {
+            $query->select('locacoes.*');
+        }
+
+        return $query;
+    }
+
     public function findAll(array $criteria = [], array $orderBy = [], array $orWhereCriteria = [])
     {
         if (app()->environment('testing')) {
+            return $this->buildQuery($criteria, $orderBy, $orWhereCriteria)->get();
+        }
+
+        if (isset($criteria['name'])) {
             return $this->buildQuery($criteria, $orderBy, $orWhereCriteria)->get();
         }
 

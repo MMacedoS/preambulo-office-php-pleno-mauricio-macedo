@@ -66,6 +66,7 @@ class LocacaoController extends Controller
             'movies.*' => 'string|exists:filmes,uuid',
             'status' => 'required|string|in:ativo,devolvido,atrasado',
             'total_value' => 'required|numeric|min:0',
+            'penalty' => 'nullable|numeric|min:0',
         ]);
 
         $insufficientStockMovies = $this->locacaoFilmesRepository->validateMovieStock($validatedData['movies']);
@@ -117,6 +118,7 @@ class LocacaoController extends Controller
             'movies.*' => 'string|exists:filmes,uuid',
             'status' => 'required|string|in:ativo,devolvido,atrasado',
             'total_value' => 'required|numeric|min:0',
+            'penalty' => 'nullable|numeric|min:0',
         ]);
 
         $currentMovieUuids = $locacao->filmes->pluck('uuid')->toArray();
