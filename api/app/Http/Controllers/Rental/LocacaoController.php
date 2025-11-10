@@ -63,7 +63,7 @@ class LocacaoController extends Controller
             'rental_date' => 'required|date',
             'return_date' => 'required|date|after_or_equal:rental_date',
             'movies' => 'required|array|min:1',
-            'movies.*' => 'integer|exists:filmes,id',
+            'movies.*' => 'string|exists:filmes,uuid',
             'status' => 'required|string|in:ativo,devolvido,atrasado',
             'total_value' => 'required|numeric|min:0',
         ]);
@@ -114,7 +114,7 @@ class LocacaoController extends Controller
             'rental_date' => 'required|date',
             'return_date' => 'required|date|after_or_equal:rental_date',
             'movies' => 'required|array|min:1',
-            'movies.*' => 'integer|exists:filmes,id',
+            'movies.*' => 'string|exists:filmes,uuid',
             'status' => 'required|string|in:ativo,devolvido,atrasado',
             'total_value' => 'required|numeric|min:0',
         ]);

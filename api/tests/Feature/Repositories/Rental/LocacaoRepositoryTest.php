@@ -49,14 +49,14 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         $filme2 = $this->mockFilme();
 
         $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [
-            $filme1->id,
-            $filme2->id,
+            $filme1->uuid,
+            $filme2->uuid,
         ]);
 
         $locacao->refresh();
         $this->assertCount(2, $locacao->filmes);
 
-        $this->locacaoFilmesRepository->detachMoviesFromLocacao($locacao->id, [$filme1->id]);
+        $this->locacaoFilmesRepository->detachMoviesFromLocacao($locacao->id, [$filme1->uuid]);
 
         $locacao->refresh();
         $this->assertCount(1, $locacao->filmes);
@@ -79,12 +79,12 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         $filme2 = $this->mockFilme();
 
         $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [
-            $filme1->id,
-            $filme2->id,
+            $filme1->uuid,
+            $filme2->uuid,
         ]);
 
         $this->locacaoFilmesRepository->detachMoviesFromLocacao($locacao->id, [
-            $filme1->id,
+            $filme1->uuid,
         ]);
 
         $locacaoRefresh = $this->locacaoRepository->findById($locacao->id);
@@ -109,8 +109,8 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         $filme2 = $this->mockFilme(['valor_aluguel' => 25.00]);
 
         $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [
-            $filme1->id,
-            $filme2->id,
+            $filme1->uuid,
+            $filme2->uuid,
         ]);
 
         $totalValue = $this->locacaoFilmesRepository->calculateTotalValue($locacao->id);
@@ -132,7 +132,7 @@ class LocacaoRepositoryTest extends \Tests\TestCase
         );
         $filme1 = $this->mockFilme(['valor_aluguel' => 10.00]);
 
-        $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [$filme1->id]);
+        $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, [$filme1->uuid]);
         $this->locacaoFilmesRepository->updateLocacaoTotalValue($locacao->id);
 
         $locacaoRefresh = $this->locacaoRepository->findById($locacao->id);

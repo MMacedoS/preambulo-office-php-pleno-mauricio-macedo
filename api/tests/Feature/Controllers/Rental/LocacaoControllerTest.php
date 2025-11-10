@@ -23,7 +23,7 @@ class LocacaoControllerTest extends \Tests\TestCase
         $filme2 = $this->mockFilme(['quantidade' => 3]);
         $payload = [
             'client_id' => $client->uuid,
-            'movies' => [$filme1->id, $filme2->id],
+            'movies' => [$filme1->uuid, $filme2->uuid],
             'return_date' => now()->addDays(5)->toDateString(),
             'rental_date' => now()->toDateString(),
             'status' => 'ativo',
@@ -64,7 +64,6 @@ class LocacaoControllerTest extends \Tests\TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'client_id',
-            'movies',
             'return_date',
             'status',
             'total_value',
@@ -97,7 +96,7 @@ class LocacaoControllerTest extends \Tests\TestCase
 
         $payload = [
             'client_id' => $client->uuid,
-            'movies' => [$filme1->id, $filme2->id],
+            'movies' => [$filme1->uuid, $filme2->uuid],
             'return_date' => now()->addDays(5)->toDateString(),
             'rental_date' => now()->toDateString(),
             'status' => 'ativo',
@@ -126,7 +125,7 @@ class LocacaoControllerTest extends \Tests\TestCase
         $filme2 = $this->mockFilme(['quantidade' => 3]);
         $payload = [
             'client_id' => $client->uuid,
-            'movies' => [$filme1->id, $filme2->id],
+            'movies' => [$filme1->uuid, $filme2->uuid],
             'return_date' => now()->addDays(5)->toDateString(),
             'rental_date' => now()->toDateString(),
             'status' => 'ativo',
@@ -151,7 +150,7 @@ class LocacaoControllerTest extends \Tests\TestCase
         $filme2 = $this->mockFilme(['quantidade' => 3]);
         $payload = [
             'client_id' => $client->uuid,
-            'movies' => [$filme1->id, $filme2->id],
+            'movies' => [$filme1->uuid, $filme2->uuid],
             'return_date' => now()->addDays(5)->toDateString(),
             'rental_date' => now()->toDateString(),
             'status' => 'ativo',

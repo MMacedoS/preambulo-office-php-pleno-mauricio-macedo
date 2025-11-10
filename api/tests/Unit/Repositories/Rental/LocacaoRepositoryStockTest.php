@@ -28,7 +28,7 @@ class LocacaoRepositoryStockTest extends TestCase
         $locacao = Locacao::factory()->create(['usuario_id' => $usuario->id]);
         $filme = Filme::factory()->create(['quantidade' => 10]);
 
-        $this->repository->attachMoviesToLocacao($locacao->id, [$filme->id]);
+        $this->repository->attachMoviesToLocacao($locacao->id, [$filme->uuid]);
 
         $this->assertEquals(9, $filme->fresh()->quantidade);
     }
@@ -40,7 +40,7 @@ class LocacaoRepositoryStockTest extends TestCase
         $filme1 = Filme::factory()->create(['quantidade' => 10]);
         $filme2 = Filme::factory()->create(['quantidade' => 15]);
 
-        $this->repository->attachMoviesToLocacao($locacao->id, [$filme1->id, $filme2->id]);
+        $this->repository->attachMoviesToLocacao($locacao->id, [$filme1->uuid, $filme2->uuid]);
 
         $this->assertEquals(9, $filme1->fresh()->quantidade);
         $this->assertEquals(14, $filme2->fresh()->quantidade);
@@ -54,7 +54,7 @@ class LocacaoRepositoryStockTest extends TestCase
 
         $locacao->filmes()->attach($filme->id, ['quantidade' => 1, 'preco_unitario' => 10]);
 
-        $this->repository->detachMoviesFromLocacao($locacao->id, [$filme->id]);
+        $this->repository->detachMoviesFromLocacao($locacao->id, [$filme->uuid]);
 
         $this->assertEquals(10, $filme->fresh()->quantidade);
     }
@@ -69,7 +69,7 @@ class LocacaoRepositoryStockTest extends TestCase
         $locacao->filmes()->attach($filme1->id, ['quantidade' => 1, 'preco_unitario' => 10]);
         $locacao->filmes()->attach($filme2->id, ['quantidade' => 1, 'preco_unitario' => 15]);
 
-        $this->repository->detachMoviesFromLocacao($locacao->id, [$filme1->id, $filme2->id]);
+        $this->repository->detachMoviesFromLocacao($locacao->id, [$filme1->uuid, $filme2->uuid]);
 
         $this->assertEquals(10, $filme1->fresh()->quantidade);
         $this->assertEquals(14, $filme2->fresh()->quantidade);
@@ -83,7 +83,7 @@ class LocacaoRepositoryStockTest extends TestCase
 
         $this->repository->attachMoviesToLocacao(
             $locacao->id,
-            [(object)['id' => $filme->id, 'quantidade' => 5]]
+            [(object)['uuid' => $filme->uuid, 'quantidade' => 5]]
         );
 
         $this->assertEquals(15, $filme->fresh()->quantidade);

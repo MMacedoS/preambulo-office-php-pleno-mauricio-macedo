@@ -24,7 +24,7 @@ class LocacaoFilmesRepositoryTest extends TestCase
         $filme1 = Filme::factory()->create(['quantidade' => 5]);
         $filme2 = Filme::factory()->create(['quantidade' => 3]);
 
-        $result = $this->repository->validateMovieStock([$filme1->id, $filme2->id]);
+        $result = $this->repository->validateMovieStock([$filme1->uuid, $filme2->uuid]);
 
         $this->assertNull($result);
     }
@@ -34,7 +34,7 @@ class LocacaoFilmesRepositoryTest extends TestCase
         $filme1 = Filme::factory()->create(['quantidade' => 0]);
         $filme2 = Filme::factory()->create(['quantidade' => 3]);
 
-        $result = $this->repository->validateMovieStock([$filme1->id, $filme2->id]);
+        $result = $this->repository->validateMovieStock([$filme1->uuid, $filme2->uuid]);
 
         $this->assertNotNull($result);
         $this->assertContains($filme1->id, $result);
@@ -46,7 +46,7 @@ class LocacaoFilmesRepositoryTest extends TestCase
         $filme1 = Filme::factory()->create(['quantidade' => 0]);
         $filme2 = Filme::factory()->create(['quantidade' => 0]);
 
-        $result = $this->repository->validateMovieStock([$filme1->id, $filme2->id]);
+        $result = $this->repository->validateMovieStock([$filme1->uuid, $filme2->uuid]);
 
         $this->assertNotNull($result);
         $this->assertCount(2, $result);

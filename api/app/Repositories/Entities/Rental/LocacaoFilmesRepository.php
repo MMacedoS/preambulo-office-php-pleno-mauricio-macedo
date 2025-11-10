@@ -5,7 +5,7 @@ namespace App\Repositories\Entities\Rental;
 use App\Models\Rental\Locacao;
 use App\Models\Rental\LocacaoFilme;
 use App\Repositories\Contracts\Rental\ILocacaoFilmesRepository;
-use App\Repositories\Contracts\Movies\IFilmeRepository;
+use App\Repositories\Entities\Movies\FilmeRepository;
 use App\Repositories\Traits\CacheTrait;
 use App\Repositories\Traits\SingletonTrait;
 
@@ -14,7 +14,6 @@ class LocacaoFilmesRepository implements ILocacaoFilmesRepository
     use SingletonTrait, CacheTrait;
 
     protected $model;
-    protected IFilmeRepository $filmeRepository;
 
     public function __construct()
     {
@@ -23,45 +22,52 @@ class LocacaoFilmesRepository implements ILocacaoFilmesRepository
 
     public function validateMovieStock(array $movieIds): ?array
     {
-        $filmeRepository = $this->getFilmeRepository();
-        $moviesWithInsufficientStock = $filmeRepository->findByIdsWithInsufficientStock($movieIds);
+        $filmeRepository = FilmeRepository::getInstance();
+        $filmeIds = [];
+
+        foreach ($movieIds as $uuid) {
+            $filme = $filmeRepository->findByUuid($uuid);
+            if ($filme) {
+                $filmeIds[] = $filme->id;
+            }
+        }
+
+        if (empty($filmeIds)) {
+            return $movieIds;
+        }
+
+        $moviesWithInsufficientStock = $filmeRepository->findByIdsWithInsufficientStock($filmeIds);
         return empty($moviesWithInsufficientStock) ? null : $moviesWithInsufficientStock;
     }
 
     public function getAvailableMovies(array $movieIds)
     {
-        $filmeRepository = $this->getFilmeRepository();
-        return $filmeRepository->findAvailableByIds($movieIds);
+        return FilmeRepository::getInstance()->findAvailableByIds($movieIds);
     }
 
     public function getTotalQuantityAvailable(int $movieId): int
     {
-        $filmeRepository = $this->getFilmeRepository();
-        $filme = $filmeRepository->findById($movieId);
+        $filme = FilmeRepository::getInstance()->findById($movieId);
         return $filme ? $filme->quantidade : 0;
     }
 
     public function decrementMovieStock(int $filmeId, int $quantidade = 1): bool
     {
-        $filmeRepository = $this->getFilmeRepository();
-        return $filmeRepository->decrementQuantity($filmeId, $quantidade);
+        return FilmeRepository::getInstance()->decrementQuantity($filmeId, $quantidade);
     }
 
     public function incrementMovieStock(int $filmeId, int $quantidade = 1): bool
     {
-        $filmeRepository = $this->getFilmeRepository();
-        return $filmeRepository->incrementQuantity($filmeId, $quantidade);
+        return FilmeRepository::getInstance()->incrementQuantity($filmeId, $quantidade);
     }
 
     public function attachMoviesToLocacao(int $locacaoId, array $filmes): void
     {
-        $filmeRepository = $this->getFilmeRepository();
-
         foreach ($filmes as $filme) {
-            $filmeId = is_object($filme) ? $filme->id : $filme;
+            $filmeId = is_object($filme) ? $filme->uuid : $filme;
             $quantidade = (is_object($filme) && isset($filme->quantidade)) ? $filme->quantidade : 1;
 
-            $filmeModel = $filmeRepository->findById($filmeId);
+            $filmeModel = FilmeRepository::getInstance()->findByUuid($filmeId);
             if (!$filmeModel) {
                 continue;
             }
@@ -80,9 +86,14 @@ class LocacaoFilmesRepository implements ILocacaoFilmesRepository
     public function detachMoviesFromLocacao(int $locacaoId, array $filmes): void
     {
         foreach ($filmes as $filmeId) {
+            $filmeModel = FilmeRepository::getInstance()->findByUuid($filmeId);
+            if (!$filmeModel) {
+                continue;
+            }
+
             $locacaoFilme = $this->model
                 ->where('locacao_id', $locacaoId)
-                ->where('filme_id', $filmeId)
+                ->where('filme_id', $filmeModel->id)
                 ->first();
 
             if ($locacaoFilme) {
@@ -108,13 +119,5 @@ class LocacaoFilmesRepository implements ILocacaoFilmesRepository
         $total = $this->calculateTotalValue($locacaoId);
 
         Locacao::where('id', $locacaoId)->update(['valor_total' => $total]);
-    }
-
-    protected function getFilmeRepository(): IFilmeRepository
-    {
-        if (!isset($this->filmeRepository)) {
-            $this->filmeRepository = app()->make(IFilmeRepository::class);
-        }
-        return $this->filmeRepository;
     }
 }
