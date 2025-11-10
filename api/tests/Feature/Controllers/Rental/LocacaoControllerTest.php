@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Controllers\Rental;
 
+use Illuminate\Support\Facades\DB;
 
 class LocacaoControllerTest extends \Tests\TestCase
 {
@@ -208,5 +209,52 @@ class LocacaoControllerTest extends \Tests\TestCase
         $response->assertStatus(200);
         $responseData = $response->json();
         $this->assertCount(2, $responseData['data']);
+    }
+
+    public function test_rental_update_with_authenticated(): void
+    {
+        $this->test_create_locacao_endpoint_atendente();
+
+        $filme1 = $this->mockFilme(['quantidade' => 5]);
+        $client = $this->mockUsuarioCliente();
+
+        $payload = [
+            'client_id' => $client->uuid,
+            'movies' => [$filme1->uuid],
+            'return_date' => now()->addDays(5)->toDateString(),
+            'rental_date' => now()->toDateString(),
+            'status' => 'ativo',
+            'total_value' => 50.00,
+        ];
+
+        $user = $this->mockUsuarioAdmin();
+
+        $locacao = DB::table('locacoes')->first();
+
+        $response = $this->withHeaders(
+            $this->getAuthHeaders($user)
+        )->putJson('/api/v1/rentals/' . $locacao->uuid, $payload);
+
+        $response->assertStatus(200);
+        $responseData = $response->json();
+        $this->assertEquals($locacao->uuid, $responseData['data']['id']);
+        $this->assertEquals($locacao->id, $responseData['data']['code']);
+        $this->assertCount(1, $responseData['data']['movies']);
+        $this->assertEquals($locacao->status, $responseData['data']['status']);
+    }
+
+    public function test_rental_delete(): void
+    {
+        $this->test_create_locacao_endpoint_atendente();
+
+        $user = $this->mockUsuarioAdmin();
+
+        $locacao = DB::table('locacoes')->first();
+
+        $response = $this->withHeaders(
+            $this->getAuthHeaders($user)
+        )->deleteJson('/api/v1/rentals/' . $locacao->uuid);
+
+        $response->assertStatus(422);
     }
 }

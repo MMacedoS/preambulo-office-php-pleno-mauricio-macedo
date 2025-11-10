@@ -7,6 +7,7 @@ use App\Models\Movies\Filme;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\DB;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -14,6 +15,11 @@ abstract class TestCase extends BaseTestCase
 
     public function mockUsuarioAdmin($email = 'admin@localfilmes.com')
     {
+        $user = DB::table('users')->where('email', $email)->first();
+        if ($user) {
+            return $user;
+        }
+
         $user = User::factory()->create([
             'name' => 'Admin User',
             'email' => $email,
@@ -26,6 +32,11 @@ abstract class TestCase extends BaseTestCase
 
     public function mockUsuarioAtendente($email = 'atendente@localfilmes.com')
     {
+        $user = DB::table('users')->where('email', $email)->first();
+        if ($user) {
+            return $user;
+        }
+
         $user = User::factory()->create([
             'name' => 'Atendente User',
             'email' => $email,
@@ -38,6 +49,11 @@ abstract class TestCase extends BaseTestCase
 
     public function mockUsuarioCliente($email = 'cliente@localfilmes.com')
     {
+        $user = DB::table('users')->where('email', $email)->first();
+        if ($user) {
+            return $user;
+        }
+
         $user = User::factory()->create([
             'name' => 'Cliente User',
             'email' => $email,

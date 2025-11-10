@@ -119,15 +119,29 @@ class LocacaoController extends Controller
             'total_value' => 'required|numeric|min:0',
         ]);
 
-        $insufficientStockMovies = $this->locacaoFilmesRepository->validateMovieStock($validatedData['movies']);
+        $currentMovieUuids = $locacao->filmes->pluck('uuid')->toArray();
+        $newMovieUuids = $validatedData['movies'];
 
-        if ($insufficientStockMovies !== null) {
-            return response()->json([
-                'message' => 'Validação falhou',
-                'errors' => [
-                    'movies' => ['Um ou mais filmes não possuem quantidade disponível para aluguel.']
-                ]
-            ], 422);
+        $moviesToRemove = array_diff($currentMovieUuids, $newMovieUuids);
+        $moviesToAdd = array_diff($newMovieUuids, $currentMovieUuids);
+
+        if (!empty($moviesToRemove)) {
+            $this->locacaoFilmesRepository->detachMoviesFromLocacao($locacao->id, $moviesToRemove);
+        }
+
+        if (!empty($moviesToAdd)) {
+            $insufficientStockMovies = $this->locacaoFilmesRepository->validateMovieStock($moviesToAdd);
+
+            if ($insufficientStockMovies !== null) {
+                return response()->json([
+                    'message' => 'Validação falhou',
+                    'errors' => [
+                        'movies' => ['Um ou mais filmes não possuem quantidade disponível para aluguel.']
+                    ]
+                ], 422);
+            }
+
+            $this->locacaoFilmesRepository->attachMoviesToLocacao($locacao->id, $moviesToAdd);
         }
 
         $dataTransformed = $this->locacaoTransformer->transformArray($validatedData);

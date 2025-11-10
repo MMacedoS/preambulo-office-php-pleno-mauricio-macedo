@@ -3,6 +3,7 @@
 namespace App\Repositories\Traits;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use Carbon\Carbon;
 
 trait CacheTrait
@@ -53,13 +54,11 @@ trait CacheTrait
 
         $cacheDriver = config('cache.default');
         if ($cacheDriver === 'redis') {
-            $redis = Cache::connection('redis');
-            $pattern = $tableName . '_*';
-            $keys = $redis->connection()->keys($pattern);
+            $pattern = config('cache.prefix') . $tableName . '_*';
+            $keys = Redis::keys($pattern);
 
             foreach ($keys as $key) {
-                $cleanKey = str_replace(config('cache.prefix'), '', $key);
-                Cache::forget($cleanKey);
+                Cache::forget($key);
             }
         }
     }
