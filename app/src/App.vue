@@ -1,11 +1,7 @@
-<script setup></script>
-
 <template>
-  <h1>Olá Word</h1>
+  <router-view />
 </template>
 
-<style scoped>
-h1 {
-  color: #cecece;
-}
-</style>
+<script setup></script>
+
+<style scoped></style>
