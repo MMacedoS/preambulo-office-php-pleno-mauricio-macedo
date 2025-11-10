@@ -411,18 +411,18 @@
                 >
                   <td class="py-3 px-4">{{ movie.title }}</td>
                   <td class="py-3 px-4">
-                    R$ {{ parseFloat(movie.price).toFixed(2) }}
+                    R$ {{ parseFloat(movie.rental_price).toFixed(2) }}
                   </td>
                   <td class="py-3 px-4">
                     <span
                       class="inline-block px-3 py-1 rounded-full text-xs font-semibold"
                       :class="
-                        movie.stock > 0
+                        movie.quantity > 0
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       "
                     >
-                      {{ movie.stock }}
+                      {{ movie.quantity }}
                     </span>
                   </td>
                   <td class="py-3 px-4 text-center">
@@ -545,7 +545,7 @@
             >Preço</label
           >
           <input
-            v-model.number="selectedMovie.price"
+            v-model.number="selectedMovie.rental_price"
             type="number"
             step="0.01"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -557,7 +557,7 @@
             >Estoque</label
           >
           <input
-            v-model.number="selectedMovie.stock"
+            v-model.number="selectedMovie.quantity"
             type="number"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             placeholder="0"
@@ -924,8 +924,21 @@ const handleMovieFormClose = () => {
   movieFormMode.value = "create";
 };
 
-const handleMovieFormSubmit = (data) => {
-  console.log("Filme salvo:", data);
+const handleMovieFormSubmit = async (data) => {
+  try {
+    if (movieFormMode.value === "create") {
+      await apiClient.post("movies", data);
+      alert("Filme criado com sucesso");
+    } else {
+      await apiClient.put(`movies/${data.id}`, data);
+      alert("Filme atualizado com sucesso");
+    }
+    loadMovies(currentMoviesPage.value, searchMoviesQuery.value);
+    handleMovieFormClose();
+  } catch (error) {
+    console.error("Erro ao salvar filme:", error);
+    alert("Erro ao salvar filme");
+  }
 };
 
 const handleMovieFormSuccess = ({ message }) => {
