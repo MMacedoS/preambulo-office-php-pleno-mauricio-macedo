@@ -28,7 +28,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Credenciais inválidas'], 401);
         }
 
-        return response()->json(['message' => 'Login bem-sucedido', 'token' => $result['token']], 200);
+        return response()->json(
+            [
+                'message' => 'Login bem-sucedido',
+                'user' => $result['user'],
+                'token' => $result['token']
+            ],
+            200
+        );
     }
 
     public function register(Request $request)

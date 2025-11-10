@@ -17,6 +17,7 @@ export const authService = {
   logout() {
     return apiClient.post("/logout").finally(() => {
       localStorage.removeItem("authToken");
+      localStorage.removeItem("authUser");
     });
   },
 
@@ -28,8 +29,23 @@ export const authService = {
     localStorage.setItem("authToken", token);
   },
 
+  getUser() {
+    const user = localStorage.getItem("authUser");
+    return user ? JSON.parse(user) : null;
+  },
+
+  setUser(user) {
+    localStorage.setItem("authUser", JSON.stringify(user));
+  },
+
+  getUserRole() {
+    const user = this.getUser();
+    return user ? user.role : null;
+  },
+
   clearToken() {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("authUser");
   },
 
   isAuthenticated() {
