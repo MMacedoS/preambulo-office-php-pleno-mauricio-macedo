@@ -4,6 +4,8 @@ use App\Http\Controllers\users\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users/profile', [UserController::class, 'profile'])->name('api.user.profile');
+    Route::put('/users/profile', [UserController::class, 'profileUpdate'])->name('api.user.profile.update');
     Route::get('/users', [UserController::class, 'index'])->name('api.user.index')->middleware('permission:ver_usuarios');
     Route::get('/users/{id}', [UserController::class, 'show'])->name('api.user.show')->middleware('permission:ver_usuarios');
     Route::post('/users', [UserController::class, 'store'])->name('api.user.store')->middleware('permission:criar_usuarios');

@@ -135,4 +135,34 @@ class UserController extends Controller
         }
         return response()->json(['message' => 'Usuário deletado com sucesso'], 204);
     }
+
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+
+        $user = $this->usuarioTransformer->transform($user);
+
+        return response()->json(['data' => $user], 200);
+    }
+
+    public function profileUpdate(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|required|string|min:8',
+        ]);
+
+        $updatedUser = $this->usuarioRepository->update($user->id, $validated);
+
+        if (!$updatedUser) {
+            return response()->json(['message' => 'Usuário não encontrado ou não pôde ser atualizado'], 422);
+        }
+
+        $updatedUser = $this->usuarioTransformer->transform($updatedUser);
+
+        return response()->json(['data' => $updatedUser], 200);
+    }
 }

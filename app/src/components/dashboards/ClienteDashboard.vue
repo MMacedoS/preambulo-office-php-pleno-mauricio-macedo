@@ -12,12 +12,20 @@
             </h1>
             <p class="text-gray-600 mt-2">Bem-vindo ao seu painel de cliente</p>
           </div>
-          <button
-            @click="handleLogout"
-            class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg"
-          >
-            Sair
-          </button>
+          <div class="flex gap-3">
+            <button
+              @click="showProfileEditor = true"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            >
+              Editar Perfil
+            </button>
+            <button
+              @click="handleLogout"
+              class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg"
+            >
+              Sair
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -279,6 +287,16 @@
         </div>
       </template>
     </div>
+
+    <ProfileEditor
+      v-if="showProfileEditor"
+      :userId="user.uuid"
+      :userRole="user.role"
+      :showPasswordField="true"
+      :canEditRole="false"
+      @close="handleProfileEditorClose"
+      @save="handleProfileSaved"
+    />
   </div>
 </template>
 
@@ -290,6 +308,7 @@ import apiClient from "@/services/apiClient";
 import Accordion from "@/components/shared/Accordion.vue";
 import RentalsFilter from "@/components/shared/RentalsFilter.vue";
 import CatalogoDashboard from "@/components/dashboards/CatalogoDashboard.vue";
+import ProfileEditor from "@/components/shared/ProfileEditor.vue";
 
 const router = useRouter();
 const { state, logout } = useAuth();
@@ -301,6 +320,7 @@ const rentals = ref([]);
 const showDetails = ref(false);
 const showRentalsHistory = ref(false);
 const showCatalog = ref(false);
+const showProfileEditor = ref(false);
 const rentalsHistory = ref([]);
 const historyMeta = ref(null);
 const currentHistoryPage = ref(1);
@@ -393,6 +413,15 @@ const handleApplyFilters = (filters) => {
 const handleResetFilters = () => {
   currentFilters.value = {};
   loadRentalsHistory(1);
+};
+
+const handleProfileEditorClose = () => {
+  showProfileEditor.value = false;
+};
+
+const handleProfileSaved = (updatedUser) => {
+  user.name = updatedUser.name;
+  user.email = updatedUser.email;
 };
 
 onMounted(() => {
