@@ -228,10 +228,24 @@ class LocacaoController extends Controller
     public function rentalHistory(Request $request)
     {
         $user = $request->user();
-        $rentalHistory = $this->locacaoRepository->getClientRentalHistory($user->id);
+        $perPage = $request->get('per_page', 15);
+        $orderBy = $request->get('orderBy', ['created_at' => 'desc']);
+        $filters = $request->except(['per_page', 'orderBy', 'page']);
 
-        $rentalHistory = $this->locacaoTransformer->transformCollection($rentalHistory);
+        $filterData = $this->prepareFilters($filters);
 
-        return response()->json(['data' => $rentalHistory], 200);
+        $filterData['criteria']['usuario_id'] = $user->id;
+
+        $locacoes = $this->locacaoRepository->findAll($filterData['criteria'], $orderBy, $filterData['orWhere']);
+        $transformed = $this->locacaoTransformer->transformCollection($locacoes);
+        $paginated = $this->paginate($transformed, $perPage);
+
+        return response()->json(
+            [
+                'data' => $paginated->items(),
+                'meta' => $this->getPaginationMeta($paginated)
+            ],
+            200
+        );
     }
 }
