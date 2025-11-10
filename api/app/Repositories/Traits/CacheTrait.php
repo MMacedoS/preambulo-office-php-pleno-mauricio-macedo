@@ -50,6 +50,18 @@ trait CacheTrait
     {
         Cache::forget($tableName . '_all');
         Cache::forget($tableName . '_cached_ids');
+
+        $cacheDriver = config('cache.default');
+        if ($cacheDriver === 'redis') {
+            $redis = Cache::connection('redis');
+            $pattern = $tableName . '_*';
+            $keys = $redis->connection()->keys($pattern);
+
+            foreach ($keys as $key) {
+                $cleanKey = str_replace(config('cache.prefix'), '', $key);
+                Cache::forget($cleanKey);
+            }
+        }
     }
 
     private function forgetClassObjects(object $model)

@@ -22,7 +22,6 @@ class UserObserver
     public function updated(User $user)
     {
         $this->removeCachedObject($user);
-        $this->removeAllCacheByTable('users');
     }
 
     public function deleting(User $user) {}

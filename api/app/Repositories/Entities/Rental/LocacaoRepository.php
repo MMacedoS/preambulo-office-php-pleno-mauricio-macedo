@@ -86,13 +86,13 @@ class LocacaoRepository implements ILocacaoRepository
         }
 
         try {
-            $locacao = $this->findById($id);
+            $locacao = $this->model->find($id);
             if (is_null($locacao)) {
                 return null;
             }
 
             $locacao->update($data);
-            return $locacao;
+            return $this->findById($id);
         } catch (\Exception $e) {
             return null;
         }
