@@ -276,4 +276,18 @@ class LocacaoController extends Controller
 
         return response()->json(['total_late_returns' => $totalLateReturns], 200);
     }
+
+    public function totalsRevenue()
+    {
+        $totalRevenue = $this->locacaoRepository->totalRevenue();
+
+        return response()->json(['total_revenue' => $totalRevenue], 200);
+    }
+
+    public function totalsPending()
+    {
+        $totalPending = $this->locacaoRepository->totalPending();
+
+        return response()->json(['total_pending' => $totalPending], 200);
+    }
 }

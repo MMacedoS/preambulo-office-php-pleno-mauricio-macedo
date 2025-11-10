@@ -7,6 +7,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('rentals/history', [\App\Http\Controllers\Rental\LocacaoController::class, 'rentalHistory'])->middleware('permission:ver_meus_alugueis');
     Route::get('totals-rentals-active', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsRentals'])->middleware('permission:gerenciar_alugueis');
     Route::get('totals-late-returns', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsLateReturns'])->middleware('permission:gerenciar_alugueis');
+    Route::get('totals-revenue', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsRevenue'])->middleware('role:administrador');
+    Route::get('totals-pending', [\App\Http\Controllers\Rental\LocacaoController::class, 'totalsPending'])->middleware('role:administrador');
 
     Route::apiResource(
         'rentals',

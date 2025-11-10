@@ -43,6 +43,7 @@ enum UserRole: string
                 'gerenciar_filmes',
                 'gerenciar_alugueis',
                 'ver_todos_alugueis',
+                'financeiro',
                 'ver_clientes',
                 'ver_perfil',
                 'ver_usuarios',

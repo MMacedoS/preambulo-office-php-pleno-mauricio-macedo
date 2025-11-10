@@ -269,4 +269,25 @@ class LocacaoRepository implements ILocacaoRepository
             ->with('filmes')
             ->get();
     }
+
+    public function totalRevenue(): float
+    {
+        $rentals = $this->model
+            ->where('status', 'devolvido')
+            ->get(['valor_total', 'multa']);
+
+        $total = 0;
+        foreach ($rentals as $rental) {
+            $total += (float) $rental->valor_total + (float) $rental->multa;
+        }
+
+        return $total;
+    }
+
+    public function totalPending(): float
+    {
+        return (float) $this->model
+            ->whereIn('status', [self::PENDING_STATUSES, self::ACTIVE_STATUSES])
+            ->sum('multa');
+    }
 }

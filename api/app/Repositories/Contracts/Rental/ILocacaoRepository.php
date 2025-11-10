@@ -20,4 +20,6 @@ interface ILocacaoRepository
     public function processReturn(int $locacaoId): bool;
     public function getClientActiveRentals(int $clientId);
     public function getClientRentalHistory(int $clientId);
+    public function totalRevenue(): float;
+    public function totalPending(): float;
 }
