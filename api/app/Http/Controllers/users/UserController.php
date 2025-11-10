@@ -28,7 +28,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 15);
-        $filters = $request->only(['name', 'email']);
+        $filters = $request->except(['per_page', 'orderBy', 'page']);
         $filterData = $this->prepareFilters($filters);
 
         $users = $this->usuarioRepository->findAll(

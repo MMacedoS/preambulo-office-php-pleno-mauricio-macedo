@@ -15,6 +15,7 @@ trait FilterSearchTrait
             'movie_id' => 'filme_id',
             'rental_date' => 'data_inicio',
             'return_date' => 'data_devolucao',
+            'role' => 'role',
             'code' => 'id'
         ];
 
