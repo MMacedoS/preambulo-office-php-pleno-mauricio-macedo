@@ -105,14 +105,14 @@
             </div>
 
             <button
-              v-if="!isClient && movie.quantity > 0"
+              v-if="isClient && movie.quantity > 0"
               @click="handleRent(movie)"
               class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-colors duration-200"
             >
               Alugar
             </button>
             <button
-              v-else-if="!isClient && movie.quantity === 0"
+              v-else-if="isClient && movie.quantity === 0"
               disabled
               class="w-full mt-4 bg-gray-400 text-white font-semibold py-2 rounded-lg cursor-not-allowed"
             >
@@ -138,6 +138,57 @@
         </button>
       </div>
     </div>
+
+    <div
+      v-if="showRentalModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Confirmar Aluguel</h2>
+
+        <div class="space-y-4 mb-6">
+          <div>
+            <p class="text-gray-600 text-sm">Filme</p>
+            <p class="text-lg font-semibold text-gray-800">
+              {{ selectedMovie?.title }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-gray-600 text-sm">Valor</p>
+            <p class="text-lg font-semibold text-green-600">
+              R$ {{ parseFloat(selectedMovie?.rental_price).toFixed(2) }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-gray-600 text-sm">Prazo de Devolução</p>
+            <p class="text-lg font-semibold text-gray-800">
+              {{
+                new Date(
+                  Date.now() + 7 * 24 * 60 * 60 * 1000
+                ).toLocaleDateString("pt-BR")
+              }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            @click="cancelRent"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="confirmRent"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+          >
+            Alugar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -157,6 +208,8 @@ const movies = ref([]);
 const loading = ref(true);
 const meta = ref(null);
 const currentPage = ref(1);
+const showRentalModal = ref(false);
+const selectedMovie = ref(null);
 
 const isClient = computed(() => {
   return state.user?.role === "cliente";
@@ -180,8 +233,49 @@ const loadCatalog = async (page = 1) => {
 };
 
 const handleRent = (movie) => {
-  console.log("Alugando filme:", movie);
-  // Implementar lógica de aluguel aqui
+  selectedMovie.value = movie;
+  showRentalModal.value = true;
+};
+
+const confirmRent = async () => {
+  try {
+    const rentalData = {
+      client_id: state.user?.uuid,
+      rental_date: new Date().toISOString().split("T")[0],
+      return_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      status: "ativo",
+      total_value: parseFloat(selectedMovie.value.rental_price),
+      movies: [selectedMovie.value.id || selectedMovie.value.uuid],
+    };
+
+    const response = await apiClient.post("rentals", rentalData);
+
+    if (response.data) {
+      alert(
+        `Filme "${
+          selectedMovie.value.title
+        }" alugado com sucesso! Prazo de devolução: ${new Date(
+          rentalData.return_date
+        ).toLocaleDateString("pt-BR")}`
+      );
+      showRentalModal.value = false;
+      selectedMovie.value = null;
+    }
+  } catch (error) {
+    console.error("Erro ao alugar filme:", error);
+    if (error.response?.data?.message) {
+      alert(`Erro: ${error.response.data.message}`);
+    } else {
+      alert("Erro ao alugar o filme. Tente novamente mais tarde.");
+    }
+  }
+};
+
+const cancelRent = () => {
+  showRentalModal.value = false;
+  selectedMovie.value = null;
 };
 
 const handleBack = () => {

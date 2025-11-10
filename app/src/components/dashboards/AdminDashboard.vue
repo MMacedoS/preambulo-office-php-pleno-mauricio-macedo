@@ -532,6 +532,19 @@
             />
           </div>
 
+          <div class="mb-6">
+            <select
+              v-model="filterRentalsStatus"
+              @change="loadRentals(1, searchRentalsQuery.value)"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Todos os Status</option>
+              <option value="ativo">Ativo</option>
+              <option value="devolvido">Devolvido</option>
+              <option value="atrasado">Atrasado</option>
+            </select>
+          </div>
+
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
@@ -598,11 +611,10 @@
                     </span>
                   </td>
                   <td class="py-3 px-4 text-center">
-                    <div class="flex gap-2 justify-center">
+                    <div class="relative group">
                       <button
-                        @click="editRental(rental)"
-                        title="Editar"
-                        class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg"
+                        class="text-gray-600 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-lg"
+                        title="Ações"
                       >
                         <svg
                           class="w-5 h-5"
@@ -610,27 +622,34 @@
                           viewBox="0 0 20 20"
                         >
                           <path
-                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
                           />
                         </svg>
                       </button>
-                      <button
-                        @click="deleteRental(rental.id)"
-                        title="Remover"
-                        class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg"
+                      <div
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10"
                       >
-                        <svg
-                          class="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
+                        <button
+                          @click="viewRental(rental)"
+                          class="block w-full text-left px-4 py-2 text-green-600 hover:bg-green-50"
                         >
-                          <path
-                            fill-rule="evenodd"
-                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                          Visualizar
+                        </button>
+                        <button
+                          v-if="rental.status !== 'devolvido'"
+                          @click="editRental(rental)"
+                          class="block w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          v-if="rental.status === 'ativo'"
+                          @click="deleteRental(rental.id)"
+                          class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 border-t"
+                        >
+                          Remover
+                        </button>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -754,15 +773,95 @@
 
     <Modal
       :isOpen="showRentalFormModal"
-      :title="rentalFormMode === 'create' ? 'Nova Locação' : 'Editar Locação'"
+      :title="
+        rentalFormMode === 'create'
+          ? 'Nova Locação'
+          : rentalFormMode === 'view'
+          ? 'Detalhes da Locação'
+          : 'Editar Locação'
+      "
       @close="handleRentalFormClose"
     >
       <RentalForm
+        v-if="rentalFormMode !== 'view'"
         :rental="selectedRental"
         @cancel="handleRentalFormClose"
         @success="handleRentalFormSuccess"
         @error="handleRentalFormError"
       />
+      <div v-else class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Cliente
+          </label>
+          <p class="text-gray-600">{{ selectedRental?.client?.name }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Valor Total
+          </label>
+          <p class="text-gray-600">
+            R$ {{ parseFloat(selectedRental?.total_value).toFixed(2) }}
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Multa
+          </label>
+          <p class="text-gray-600">
+            R$ {{ parseFloat(selectedRental?.penalty).toFixed(2) }}
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Filmes
+          </label>
+          <div class="space-y-2">
+            <div
+              v-for="movie in selectedRental?.movies"
+              :key="movie.id"
+              class="text-gray-600"
+            >
+              - {{ movie.title }} (R$
+              {{ parseFloat(movie.rental_price).toFixed(2) }})
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Status
+          </label>
+          <p class="text-gray-600">
+            {{ formatStatus(selectedRental?.status) }}
+          </p>
+        </div>
+        <div class="flex gap-3 justify-end border-t pt-6">
+          <button
+            @click="handleRentalFormClose"
+            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+          >
+            Fechar
+          </button>
+          <button
+            v-if="selectedRental?.status !== 'devolvido'"
+            @click="editRental(selectedRental)"
+            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+          >
+            Editar
+          </button>
+          <button
+            v-if="
+              selectedRental?.status === 'ativo' ||
+              selectedRental?.status === 'atrasado'
+            "
+            @click="processReturn(selectedRental)"
+            :disabled="processingReturn"
+            class="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium"
+          >
+            {{ processingReturn ? "Processando..." : "Finalizar Devolução" }}
+          </button>
+        </div>
+      </div>
     </Modal>
   </div>
 </template>
@@ -817,12 +916,14 @@ const selectedMovie = ref(null);
 
 const rentals = ref([]);
 const searchRentalsQuery = ref("");
+const filterRentalsStatus = ref("");
 const currentRentalsPage = ref(1);
 const totalRentalsPages = ref(1);
 const perPageRentals = ref(10);
 const showRentalFormModal = ref(false);
 const rentalFormMode = ref("create");
 const selectedRental = ref(null);
+const processingReturn = ref(false);
 
 const loadTotalRevenue = async () => {
   try {
@@ -859,6 +960,15 @@ const handleLogout = async () => {
 const formatDate = (date) => {
   if (!date) return "N/A";
   return new Date(date).toLocaleDateString("pt-BR");
+};
+
+const formatStatus = (status) => {
+  const statusMap = {
+    ativo: "Ativo",
+    devolvido: "Devolvido",
+    atrasado: "Atrasado",
+  };
+  return statusMap[status] || status;
 };
 
 const loadUsers = async (page = 1, search = "") => {
@@ -1158,7 +1268,11 @@ const loadRentals = async (page = 1, search = "") => {
     };
 
     if (search) {
-      params.user_name = search;
+      params.name = search;
+    }
+
+    if (filterRentalsStatus.value) {
+      params.status = filterRentalsStatus.value;
     }
 
     const response = await apiClient.get("rentals", { params });
@@ -1203,6 +1317,12 @@ const openNewRentalModal = () => {
   showRentalFormModal.value = true;
 };
 
+const viewRental = (rental) => {
+  rentalFormMode.value = "view";
+  selectedRental.value = rental;
+  showRentalFormModal.value = true;
+};
+
 const editRental = (rental) => {
   rentalFormMode.value = "edit";
   selectedRental.value = rental;
@@ -1235,6 +1355,26 @@ const handleRentalFormSuccess = ({ message }) => {
 
 const handleRentalFormError = ({ message }) => {
   console.error("Erro no formulário:", message);
+};
+
+const processReturn = async (rental) => {
+  if (confirm("Deseja finalizar a devolução desta locação?")) {
+    processingReturn.value = true;
+    try {
+      await apiClient.post(`rentals/${rental.id}/process-return`);
+      alert("Devolução processada com sucesso");
+      loadTotalRevenue();
+      loadLateReturns();
+      loadPendingPenalties();
+      loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
+      handleRentalFormClose();
+    } catch (error) {
+      console.error("Erro ao processar devolução:", error);
+      alert("Erro ao processar devolução");
+    } finally {
+      processingReturn.value = false;
+    }
+  }
 };
 
 onMounted(() => {
