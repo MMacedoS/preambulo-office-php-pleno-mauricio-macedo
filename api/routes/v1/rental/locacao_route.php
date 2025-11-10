@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('rentals/info-rentals', [\App\Http\Controllers\Rental\LocacaoController::class, 'rentalActiveAndLateReturns']);
+    Route::get('rentals/history', [\App\Http\Controllers\Rental\LocacaoController::class, 'rentalHistory'])->middleware('permission:ver_meus_alugueis');
+
     Route::apiResource(
         'rentals',
         \App\Http\Controllers\Rental\LocacaoController::class

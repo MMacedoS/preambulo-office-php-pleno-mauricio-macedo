@@ -18,4 +18,6 @@ interface ILocacaoRepository
     public function updatePenalty(int $locacaoId): bool;
     public function updateAllExpiredPenalties(): array;
     public function processReturn(int $locacaoId): bool;
+    public function getClientActiveRentals(int $clientId);
+    public function getClientRentalHistory(int $clientId);
 }

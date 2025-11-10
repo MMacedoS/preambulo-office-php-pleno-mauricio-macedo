@@ -12,11 +12,11 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    public function mockUsuarioAdmin()
+    public function mockUsuarioAdmin($email = 'admin@localfilmes.com')
     {
         $user = User::factory()->create([
             'name' => 'Admin User',
-            'email' => 'admin@gmail.com',
+            'email' => $email,
             'password' => bcrypt('password'),
             'role' => UserRole::ADMINISTRADOR,
         ]);
@@ -24,11 +24,11 @@ abstract class TestCase extends BaseTestCase
         return $user;
     }
 
-    public function mockUsuarioAtendente()
+    public function mockUsuarioAtendente($email = 'atendente@localfilmes.com')
     {
         $user = User::factory()->create([
             'name' => 'Atendente User',
-            'email' => 'atendente@gmail.com',
+            'email' => $email,
             'password' => bcrypt('password'),
             'role' => UserRole::ATENDENTE,
         ]);
@@ -36,11 +36,11 @@ abstract class TestCase extends BaseTestCase
         return $user;
     }
 
-    public function mockUsuarioCliente()
+    public function mockUsuarioCliente($email = 'cliente@localfilmes.com')
     {
         $user = User::factory()->create([
             'name' => 'Cliente User',
-            'email' => 'cliente@gmail.com',
+            'email' => $email,
             'password' => bcrypt('password'),
             'role' => UserRole::CLIENTE,
         ]);
@@ -51,7 +51,7 @@ abstract class TestCase extends BaseTestCase
     {
         $user = User::factory()->create([
             'name' => 'Admin User',
-            'email' => 'admin@gmail.com',
+            'email' => 'admin.test' . uniqid() . '@localfilmes.com',
             'password' => bcrypt('password'),
             'role' => UserRole::ADMINISTRADOR,
         ]);
@@ -68,7 +68,7 @@ abstract class TestCase extends BaseTestCase
     {
         $user = User::factory()->create([
             'name' => 'Atendente User',
-            'email' => 'atendente@gmail.com',
+            'email' => 'atendente.test' . uniqid() . '@localfilmes.com',
             'password' => bcrypt('password'),
             'role' => UserRole::ATENDENTE,
         ]);
@@ -85,7 +85,7 @@ abstract class TestCase extends BaseTestCase
     {
         $user = User::factory()->create([
             'name' => 'Cliente User',
-            'email' => 'cliente@gmail.com',
+            'email' => 'cliente.test' . uniqid() . '@localfilmes.com',
             'password' => bcrypt('password'),
             'role' => UserRole::CLIENTE,
         ]);
@@ -129,9 +129,12 @@ abstract class TestCase extends BaseTestCase
         return \App\Models\Rental\LocacaoFilme::factory()->create($locacaoFilmeData);
     }
 
-    public function mockLocacoesWithMovies(array $locacaoData = [])
+    public function mockLocacoesWithMovies(array $locacaoData = [], $client = null)
     {
-        $client = $this->mockUsuarioCliente();
+        if (!$client) {
+            $client = $this->mockUsuarioCliente();
+        }
+
         $filme1 = $this->mockFilme(['quantidade' => 5, 'valor_aluguel' => 10.00]);
         $filme2 = $this->mockFilme(['quantidade' => 3, 'valor_aluguel' => 15.00]);
 

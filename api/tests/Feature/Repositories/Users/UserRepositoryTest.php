@@ -23,7 +23,7 @@ class UserRepositoryTest extends \Tests\TestCase
         $user = $this->mockUsuarioAdmin();
 
         $this->assertEquals('Admin User', $user->name);
-        $this->assertEquals('admin@gmail.com', $user->email);
+        $this->assertEquals('admin@localfilmes.com', $user->email);
         $this->assertEquals('administrador', $user->role->value);
     }
 

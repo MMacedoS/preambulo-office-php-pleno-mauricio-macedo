@@ -214,4 +214,24 @@ class LocacaoController extends Controller
 
         return response()->json(['total_value' => $totalValue]);
     }
+
+    public function rentalActiveAndLateReturns(Request $request)
+    {
+        $user = $request->user();
+        $rentalsStats = $this->locacaoRepository->getClientActiveRentals($user->id);
+
+        $rentalsStats = $this->locacaoTransformer->transformCollection($rentalsStats);
+
+        return response()->json(['data' => $rentalsStats], 200);
+    }
+
+    public function rentalHistory(Request $request)
+    {
+        $user = $request->user();
+        $rentalHistory = $this->locacaoRepository->getClientRentalHistory($user->id);
+
+        $rentalHistory = $this->locacaoTransformer->transformCollection($rentalHistory);
+
+        return response()->json(['data' => $rentalHistory], 200);
+    }
 }

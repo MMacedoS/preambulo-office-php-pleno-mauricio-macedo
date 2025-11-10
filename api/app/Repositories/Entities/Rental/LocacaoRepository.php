@@ -253,4 +253,20 @@ class LocacaoRepository implements ILocacaoRepository
 
         return true;
     }
+
+    public function getClientActiveRentals(int $ClientId)
+    {
+        return $this->model
+            ->where('usuario_id', $ClientId)
+            ->whereIn('status', [self::ACTIVE_STATUSES, self::PENDING_STATUSES])
+            ->get();
+    }
+
+    public function getClientRentalHistory(int $ClientId)
+    {
+        return $this->model
+            ->where('usuario_id', $ClientId)
+            ->with('filmes')
+            ->get();
+    }
 }

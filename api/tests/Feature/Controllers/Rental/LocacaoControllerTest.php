@@ -187,4 +187,27 @@ class LocacaoControllerTest extends \Tests\TestCase
         $this->assertEqualsWithDelta($locacao->valor_total, $responseData['total_value'], 0.01);
         $this->assertEqualsWithDelta(50.00, $responseData['penalty'], 0.01);
     }
+
+    public function test_rental_active_and_late_returns(): void
+    {
+        $client = $this->mockUsuarioCliente("cliente1@gmail.com");
+        $this->mockLocacoesWithMovies([
+            'usuario_id' => $client->id,
+            'status' => 'ativo',
+            'data_devolucao' => now()->addDays(3)->toDateString(),
+        ], $client);
+        $this->mockLocacoesWithMovies([
+            'usuario_id' => $client->id,
+            'status' => 'atrasado',
+            'data_devolucao' => now()->subDays(2)->toDateString(),
+        ], $client);
+
+        $response = $this->withHeaders(
+            $this->getAuthHeaders($client)
+        )->getJson('/api/v1/rentals/info-rentals');
+
+        $response->assertStatus(200);
+        $responseData = $response->json();
+        $this->assertCount(2, $responseData['data']);
+    }
 }
