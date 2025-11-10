@@ -16,10 +16,10 @@ class UserSeeder extends Seeder
     {
         User::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'name' => 'João Cliente',
-            'email' => 'cliente@gmail.com',
+            'name' => 'Admin Sistema',
+            'email' => 'admin@gmail.com',
             'password' => Hash::make('password'),
-            'role' => UserRole::CLIENTE,
+            'role' => UserRole::ADMINISTRADOR,
             'email_verified_at' => now(),
         ]);
 
@@ -34,10 +34,19 @@ class UserSeeder extends Seeder
 
         User::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'name' => 'Admin Sistema',
-            'email' => 'admin@gmail.com',
+            'name' => 'Ana Atendente',
+            'email' => 'ana@gmail.com',
             'password' => Hash::make('password'),
-            'role' => UserRole::ADMINISTRADOR,
+            'role' => UserRole::ATENDENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'João Cliente',
+            'email' => 'cliente@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
             'email_verified_at' => now(),
         ]);
 
@@ -52,10 +61,64 @@ class UserSeeder extends Seeder
 
         User::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'name' => 'Ana Atendente',
-            'email' => 'ana@gmail.com',
+            'name' => 'Carlos Silva',
+            'email' => 'carlos@gmail.com',
             'password' => Hash::make('password'),
-            'role' => UserRole::ATENDENTE,
+            'role' => UserRole::CLIENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'Fernanda Costa',
+            'email' => 'fernanda@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'Lucas Oliveira',
+            'email' => 'lucas@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'Beatriz Santos',
+            'email' => 'beatriz@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'Rafael Pereira',
+            'email' => 'rafael@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'Juliana Martins',
+            'email' => 'juliana@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
+            'email_verified_at' => now(),
+        ]);
+
+        User::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'name' => 'Thiago Rocha',
+            'email' => 'thiago@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::CLIENTE,
             'email_verified_at' => now(),
         ]);
     }

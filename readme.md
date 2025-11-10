@@ -42,6 +42,12 @@ Execute os seeds:
 docker exec -it api php artisan db:seed
 ```
 
+Os seeds vão criar:
+
+- Usuários (admin, atendentes, clientes)
+- Filmes
+- Locações atribuídas
+
 Se necessário, ajuste as permissões da pasta storage:
 
 ```bash
@@ -57,6 +63,33 @@ Front-end Vue: http://localhost:5173
 Mailhog: http://localhost:1025
 
 PgAdmin: http://localhost:5050
+
+## Usuários para Teste
+
+Admin Sistema
+
+- Email: admin@gmail.com
+- Papel: administrador
+
+Pedro Cliente
+
+- Email: pedro@gmail.com
+- Papel: cliente
+
+Ana Atendente
+
+- Email: ana@gmail.com
+- Papel: atendente
+
+João Santos
+
+- Email: joao@gmail.com
+- Papel: cliente
+
+Maria Araujo
+
+- Email: atendente@gmail.com
+- Papel: atendente
 
 ## Executar Testes
 
