@@ -568,7 +568,9 @@
                   class="border-b border-gray-200 hover:bg-gray-50"
                 >
                   <td class="py-3 px-4">{{ rental.client?.name || "N/A" }}</td>
-                  <td class="py-3 px-4">{{ rental.movies? || "N/A" }}</td>
+                  <td class="py-3 px-4">
+                    {{ rental.movies?.length || "N/A" }} Filmes
+                  </td>
                   <td class="py-3 px-4">
                     {{ formatDate(rental.rental_date) }}
                   </td>
@@ -755,87 +757,12 @@
       :title="rentalFormMode === 'create' ? 'Nova Locação' : 'Editar Locação'"
       @close="handleRentalFormClose"
     >
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Cliente</label
-          >
-          <select
-            v-model.number="selectedRental.user_id"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="">Selecione um cliente</option>
-            <option
-              v-for="client in clients"
-              :key="client.id"
-              :value="client.id"
-            >
-              {{ client.name }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Filme</label
-          >
-          <select
-            v-model.number="selectedRental.movie_id"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="">Selecione um filme</option>
-            <option v-for="movie in movies" :key="movie.id" :value="movie.id">
-              {{ movie.title }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Data de Início</label
-          >
-          <input
-            v-model="selectedRental.rental_date"
-            type="date"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Data de Retorno</label
-          >
-          <input
-            v-model="selectedRental.return_date"
-            type="date"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Status</label
-          >
-          <select
-            v-model="selectedRental.status"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="active">Ativo</option>
-            <option value="returned">Devolvido</option>
-            <option value="late">Atrasado</option>
-          </select>
-        </div>
-        <div class="flex gap-2 justify-end">
-          <button
-            @click="handleRentalFormClose"
-            class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
-          >
-            Cancelar
-          </button>
-          <button
-            @click="handleRentalFormSubmit(selectedRental)"
-            class="px-4 py-2 text-white bg-orange-600 hover:bg-orange-700 rounded-lg"
-          >
-            Salvar
-          </button>
-        </div>
-      </div>
+      <RentalForm
+        :rental="selectedRental"
+        @cancel="handleRentalFormClose"
+        @success="handleRentalFormSuccess"
+        @error="handleRentalFormError"
+      />
     </Modal>
   </div>
 </template>
@@ -847,6 +774,7 @@ import { useAuth } from "@/composables/useAuth";
 import apiClient from "@/services/apiClient";
 import Modal from "@/components/shared/Modal.vue";
 import ClientForm from "@/components/shared/ClientForm.vue";
+import RentalForm from "@/components/shared/RentalForm.vue";
 
 const router = useRouter();
 const { state, logout } = useAuth();
@@ -1298,23 +1226,6 @@ const handleRentalFormClose = () => {
   showRentalFormModal.value = false;
   selectedRental.value = null;
   rentalFormMode.value = "create";
-};
-
-const handleRentalFormSubmit = async (data) => {
-  try {
-    if (rentalFormMode.value === "create") {
-      await apiClient.post("rentals", data);
-      alert("Locação criada com sucesso");
-    } else {
-      await apiClient.put(`rentals/${data.id}`, data);
-      alert("Locação atualizada com sucesso");
-    }
-    loadRentals(currentRentalsPage.value, searchRentalsQuery.value);
-    handleRentalFormClose();
-  } catch (error) {
-    console.error("Erro ao salvar locação:", error);
-    alert("Erro ao salvar locação");
-  }
 };
 
 const handleRentalFormSuccess = ({ message }) => {
