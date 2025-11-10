@@ -126,6 +126,7 @@
                         </svg>
                       </button>
                       <button
+                        v-if="user.role === 'administrador'"
                         @click="deleteClient(client.id)"
                         title="Remover"
                         class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg"
@@ -172,26 +173,7 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-lg p-6">
-          <h2 class="text-2xl font-semibold text-gray-800 mb-6">Aluguel</h2>
-          <div class="space-y-3">
-            <button
-              class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
-            >
-              Listar Aluguéis
-            </button>
-            <button
-              class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
-            >
-              Novo Aluguel
-            </button>
-            <button
-              class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
-            >
-              Devolução
-            </button>
-          </div>
-        </div>
+        <RentalsList />
       </div>
     </div>
     <ProfileEditor
@@ -203,6 +185,22 @@
       @close="handleProfileEditorClose"
       @save="handleProfileSaved"
     />
+
+    <Modal
+      :isOpen="showClientFormModal"
+      :title="clientFormMode === 'create' ? 'Novo Cliente' : 'Editar Cliente'"
+      @close="handleClientFormClose"
+    >
+      <ClientForm
+        :client="selectedClient"
+        :canEditRole="false"
+        :includePasswordField="true"
+        @cancel="handleClientFormClose"
+        @submit="handleClientFormSubmit"
+        @success="handleClientFormSuccess"
+        @error="handleClientFormError"
+      />
+    </Modal>
   </div>
 </template>
 
@@ -212,6 +210,9 @@ import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import apiClient from "@/services/apiClient";
 import ProfileEditor from "@/components/shared/ProfileEditor.vue";
+import Modal from "@/components/shared/Modal.vue";
+import ClientForm from "@/components/shared/ClientForm.vue";
+import RentalsList from "@/components/dashboards/RentalsList.vue";
 
 const showProfileEditor = ref(false);
 const totalClients = ref(0);
@@ -225,8 +226,12 @@ const clients = ref([]);
 const searchQuery = ref("");
 const currentPage = ref(1);
 const totalPages = ref(1);
-const perPage = ref(15);
+const perPage = ref(10);
 let searchTimeout = null;
+
+const showClientFormModal = ref(false);
+const clientFormMode = ref("create");
+const selectedClient = ref(null);
 
 const handleLogout = async () => {
   await logout();
@@ -235,6 +240,26 @@ const handleLogout = async () => {
 
 const handleProfileEditorClose = () => {
   showProfileEditor.value = false;
+};
+
+const handleClientFormClose = () => {
+  showClientFormModal.value = false;
+  selectedClient.value = null;
+  clientFormMode.value = "create";
+};
+
+const handleClientFormSubmit = (data) => {
+  console.log("Cliente salvo:", data);
+};
+
+const handleClientFormSuccess = ({ message }) => {
+  loadTotalClients();
+  loadClients(currentPage.value, searchQuery.value);
+  handleClientFormClose();
+};
+
+const handleClientFormError = ({ message }) => {
+  console.error("Erro no formulário:", message);
 };
 
 const loadTotalClients = async () => {
@@ -281,7 +306,7 @@ const loadClients = async (page = 1, search = "") => {
     clients.value = response.data.data || [];
     currentPage.value = response.data.meta?.current_page || 1;
     totalPages.value = response.data.meta?.last_page || 1;
-    perPage.value = response.data.meta?.per_page || 15;
+    perPage.value = response.data.meta?.per_page || 10;
   } catch (error) {
     console.error("Erro ao carregar clientes:", error);
     clients.value = [];
@@ -311,14 +336,15 @@ const nextPage = () => {
 };
 
 const openNewClientModal = () => {
-  // TODO: Implementar modal de novo cliente
-  alert("Funcionalidade de novo cliente em desenvolvimento");
+  clientFormMode.value = "create";
+  selectedClient.value = null;
+  showClientFormModal.value = true;
 };
 
 const editClient = (client) => {
-  // TODO: Implementar edição de cliente
-  console.log("Editar cliente:", client);
-  alert(`Editar cliente: ${client.name}`);
+  clientFormMode.value = "edit";
+  selectedClient.value = client;
+  showClientFormModal.value = true;
 };
 
 const deleteClient = async (clientId) => {
