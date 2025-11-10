@@ -1,82 +1,150 @@
-# Estrutura do Projeto
+# LocaFilmes
 
-```
-├-- api/                 # API Laravel
-│   |-- app/
-│   |-- bootstrap/
-│   |-- config/
-│   |-- database/
-│   |-- public/
-│   |-- resources/
-│   |-- routes/
-│   |-- storage/
-│   |-- tests/
-│   |-- artisan
-│   |-- composer.json
-│
-|-- app/                # Aplicação Web
-│   ├-- src/
-│   ├-- public/
-│   ├-- node_modules/
-│   ├-- package.json
-│   └-- vite.config.js
-│
-├-- docker/                  # Arquivos Docker
-│   ├-- nginx/
-│   ├-- php/
-│   └-- docker-compose.yml
-│
-|-- test.sh             # Script para executar testes
-|-- README.md
+Sistema de locação de filmes.
 
-```
+LocaFilmes é uma aplicação web para gerenciar aluguel de filmes. Permite cadastro de clientes, controle de locações ativas, devoluções e gerenciamento de atrasos. Construído com Laravel (backend) e Vue.js (frontend).
 
-> **Rodar o projeto:**  
-> No terminal ou cmd execute o `docker-compose up -d`;
+## Executar o Projeto
 
-> No terminal ou cmd execute o `docker exec -it app composer install`;
-
-> No terminal ou cmd execute o `docker exec -it app php artisan key:generate`;
-
-> No terminal ou cmd execute o `docker exec -it app php artisan migrate`;
-
-> No terminal ou cmd execute o `docker exec -it app php artisan migrate`;
-
-> **Acessar o projeto:**  
-> acessar api `http://localhost:80`;
-> acessar app `http://localhost:5173`;
-
----
-
-## Como Executar Testes
-
-### Via Terminal Externo (Recomendado):
+Na raiz do projeto execute:
 
 ```bash
-# Na raiz do projeto
-./test.sh                                    # Executa TODOS os testes
-./test.sh tests/Feature/UserObserverTest.php # Executa teste específico
+docker-compose up -d
 ```
 
-### Via Terminal VS Code:
+Na pasta api, renomeie o arquivo `.env.example` para `.env`:
 
 ```bash
-php artisan test                                   # Todos os testes
-php artisan test tests/Feature/UserObserverTest.php
+cp api/.env.example api/.env
 ```
 
-### Testes Disponíveis:
+Depois execute:
 
-- `UserObserverTest` - Testa criação de usuários e observer (5 testes)
+```bash
+docker exec -it api composer install
+```
 
-## Notas sobre o Ambiente
+Gere a chave da aplicação:
 
-- PHP: Herd Lite (`/home/void/.config/herd-lite/bin/php`)
-- PHPUnit: v11.5.43
-- Banco de Testes: SQLite (`storage/testing.sqlite`)
-- RefreshDatabase: Ativo (dados temporários por teste)
+```bash
+docker exec -it api php artisan key:generate
+```
 
----
+Execute as migrations:
 
-> **Observação:**  
-> Projeto de um sistema de locação para filmes
+```bash
+docker exec -it api php artisan migrate
+```
+
+Execute os seeds:
+
+```bash
+docker exec -it api php artisan db:seed
+```
+
+Se necessário, ajuste as permissões da pasta storage:
+
+```bash
+docker exec -it api chmod -R 775 storage
+```
+
+## Acessar o Projeto
+
+API Laravel: http://localhost:80
+
+Front-end Vue: http://localhost:5173
+
+Mailhog: http://localhost:1025
+
+PgAdmin: http://localhost:5050
+
+## Executar Testes
+
+Na raiz do projeto execute:
+
+```bash
+./test.sh
+```
+
+Ou teste específico:
+
+```bash
+./test.sh tests/Feature/UserObserverTest.php
+```
+
+Via terminal do VS Code dentro do container:
+
+```bash
+php artisan test
+```
+
+## Estrutura
+
+api/ - API Laravel
+
+app/ - Aplicação Vue
+
+docker/ - Configurações Docker
+
+## Pastas do Projeto
+
+```
+---> api/
+│   ---> app/
+│   │   ---> Console/
+│   │   ---> Enums/
+│   │   ---> Http/
+│   │   ---> Jobs/
+│   │   ---> Mail/
+│   │   ---> Models/
+│   │   ---> Observers/
+│   │   ---> Providers/
+│   │   ---> Repositories/
+│   │   ---> Services/
+│   │   ---> Transformers/
+│   │   ---> Traits/
+│   ---> bootstrap/
+│   ---> config/
+│   ---> database/
+│   │   ---> factories/
+│   │   ---> migrations/
+│   │   ---> seeders/
+│   ---> public/
+│   ---> resources/
+│   ---> routes/
+│   ---> storage/
+│   ---> tests/
+│   ---> vendor/
+│   ---> artisan
+---> app/
+│   ---> src/
+│   │   ---> assets/
+│   │   ---> components/
+│   │   ---> composables/
+│   │   ---> constants/
+│   │   ---> enums/
+│   │   ---> pages/
+│   │   ---> router/
+│   │   ---> services/
+│   │   ---> utils/
+│   ---> public/
+│   ---> package.json
+---> docker/
+    ---> nginx/
+    ---> php/
+    ---> supervisor/
+```
+
+## Tecnologias
+
+Laravel 12 - Framework backend PHP
+
+Vue 3 - Framework frontend JavaScript
+
+JWT - Autenticação por token
+
+PostgreSQL - Banco de dados
+
+Docker - Containerização
+
+Tailwind CSS - Estilização frontend
