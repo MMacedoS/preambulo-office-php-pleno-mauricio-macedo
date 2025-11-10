@@ -73,6 +73,24 @@
               Clientes
             </div>
           </button>
+          <button
+            @click="activeTab = 'filmes'"
+            :class="[
+              'flex-1 py-4 px-6 font-semibold text-center transition-all',
+              activeTab === 'filmes'
+                ? 'text-green-600 border-b-2 border-green-600 bg-green-50'
+                : 'text-gray-600 hover:text-gray-800',
+            ]"
+          >
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm4 2v4h8V8H6z"
+                />
+              </svg>
+              Filmes
+            </div>
+          </button>
         </div>
       </div>
 
@@ -336,6 +354,140 @@
             </div>
           </div>
         </div>
+
+        <div
+          v-if="activeTab === 'filmes'"
+          class="bg-white rounded-lg shadow-lg p-6"
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">Filmes</h2>
+            <button
+              @click="openNewMovieModal"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            >
+              <span>+</span>
+              Novo Filme
+            </button>
+          </div>
+
+          <div class="mb-6">
+            <input
+              v-model="searchMoviesQuery"
+              @input="debounceSearchMovies"
+              type="text"
+              placeholder="Buscar por título..."
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-300">
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Título
+                  </th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Preço
+                  </th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700">
+                    Estoque
+                  </th>
+                  <th class="text-center py-3 px-4 font-semibold text-gray-700">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="movies.length === 0" class="text-center">
+                  <td colspan="4" class="py-6 text-gray-500">
+                    Nenhum filme encontrado
+                  </td>
+                </tr>
+                <tr
+                  v-for="movie in movies"
+                  :key="movie.id"
+                  class="border-b border-gray-200 hover:bg-gray-50"
+                >
+                  <td class="py-3 px-4">{{ movie.title }}</td>
+                  <td class="py-3 px-4">
+                    R$ {{ parseFloat(movie.price).toFixed(2) }}
+                  </td>
+                  <td class="py-3 px-4">
+                    <span
+                      class="inline-block px-3 py-1 rounded-full text-xs font-semibold"
+                      :class="
+                        movie.stock > 0
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      "
+                    >
+                      {{ movie.stock }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <div class="flex gap-2 justify-center">
+                      <button
+                        @click="editMovie(movie)"
+                        title="Editar"
+                        class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        @click="deleteMovie(movie.id)"
+                        title="Remover"
+                        class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-6 flex justify-between items-center">
+            <p class="text-sm text-gray-600">
+              Página {{ currentMoviesPage }} de {{ totalMoviesPages }}
+            </p>
+            <div class="flex gap-2">
+              <button
+                @click="previousMoviesPage"
+                :disabled="currentMoviesPage === 1"
+                class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button
+                @click="nextMoviesPage"
+                :disabled="currentMoviesPage === totalMoviesPages"
+                class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próximo
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -369,6 +521,63 @@
         @success="handleUserFormSuccess"
         @error="handleUserFormError"
       />
+    </Modal>
+
+    <Modal
+      :isOpen="showMovieFormModal"
+      :title="movieFormMode === 'create' ? 'Novo Filme' : 'Editar Filme'"
+      @close="handleMovieFormClose"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Título</label
+          >
+          <input
+            v-model="selectedMovie.title"
+            type="text"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Título do filme"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Preço</label
+          >
+          <input
+            v-model.number="selectedMovie.price"
+            type="number"
+            step="0.01"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="0.00"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Estoque</label
+          >
+          <input
+            v-model.number="selectedMovie.stock"
+            type="number"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="0"
+          />
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button
+            @click="handleMovieFormClose"
+            class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="handleMovieFormSubmit(selectedMovie)"
+            class="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg"
+          >
+            Salvar
+          </button>
+        </div>
+      </div>
     </Modal>
   </div>
 </template>
@@ -410,6 +619,15 @@ const perPageClients = ref(10);
 const showClientFormModal = ref(false);
 const clientFormMode = ref("create");
 const selectedClient = ref(null);
+
+const movies = ref([]);
+const searchMoviesQuery = ref("");
+const currentMoviesPage = ref(1);
+const totalMoviesPages = ref(1);
+const perPageMovies = ref(10);
+const showMovieFormModal = ref(false);
+const movieFormMode = ref("create");
+const selectedMovie = ref(null);
 
 const loadTotalRevenue = async () => {
   try {
@@ -628,11 +846,103 @@ const handleClientFormError = ({ message }) => {
   console.error("Erro no formulário:", message);
 };
 
+const loadMovies = async (page = 1, search = "") => {
+  try {
+    const params = {
+      page: page,
+      per_page: perPageMovies.value,
+    };
+
+    if (search) {
+      params.title = search;
+    }
+
+    const response = await apiClient.get("movies", { params });
+
+    movies.value = response.data.data || [];
+    currentMoviesPage.value = response.data.meta?.current_page || 1;
+    totalMoviesPages.value = response.data.meta?.last_page || 1;
+    perPageMovies.value = response.data.meta?.per_page || 10;
+  } catch (error) {
+    console.error("Erro ao carregar filmes:", error);
+    movies.value = [];
+  }
+};
+
+let searchMoviesTimeout = null;
+
+const debounceSearchMovies = () => {
+  clearTimeout(searchMoviesTimeout);
+  searchMoviesTimeout = setTimeout(() => {
+    currentMoviesPage.value = 1;
+    loadMovies(1, searchMoviesQuery.value);
+  }, 500);
+};
+
+const previousMoviesPage = () => {
+  if (currentMoviesPage.value > 1) {
+    currentMoviesPage.value--;
+    loadMovies(currentMoviesPage.value, searchMoviesQuery.value);
+  }
+};
+
+const nextMoviesPage = () => {
+  if (currentMoviesPage.value < totalMoviesPages.value) {
+    currentMoviesPage.value++;
+    loadMovies(currentMoviesPage.value, searchMoviesQuery.value);
+  }
+};
+
+const openNewMovieModal = () => {
+  movieFormMode.value = "create";
+  selectedMovie.value = null;
+  showMovieFormModal.value = true;
+};
+
+const editMovie = (movie) => {
+  movieFormMode.value = "edit";
+  selectedMovie.value = movie;
+  showMovieFormModal.value = true;
+};
+
+const deleteMovie = async (movieId) => {
+  if (confirm("Tem certeza que deseja remover este filme?")) {
+    try {
+      await apiClient.delete(`movies/${movieId}`);
+      alert("Filme removido com sucesso");
+      loadMovies(currentMoviesPage.value, searchMoviesQuery.value);
+    } catch (error) {
+      console.error("Erro ao remover filme:", error);
+      alert("Erro ao remover filme");
+    }
+  }
+};
+
+const handleMovieFormClose = () => {
+  showMovieFormModal.value = false;
+  selectedMovie.value = null;
+  movieFormMode.value = "create";
+};
+
+const handleMovieFormSubmit = (data) => {
+  console.log("Filme salvo:", data);
+};
+
+const handleMovieFormSuccess = ({ message }) => {
+  loadMovies(currentMoviesPage.value, searchMoviesQuery.value);
+  handleMovieFormClose();
+};
+
+const handleMovieFormError = ({ message }) => {
+  console.error("Erro no formulário:", message);
+};
+
 onMounted(() => {
   loadTotalRevenue();
   loadLateReturns();
   loadPendingPenalties();
   loadUsers();
   loadClients();
+  loadMovies();
 });
 </script>
