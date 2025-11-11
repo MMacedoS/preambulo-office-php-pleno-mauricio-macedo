@@ -54,6 +54,20 @@ Se necessário, ajuste as permissões da pasta storage:
 docker exec -it api chmod -R 775 storage
 ```
 
+Se necessário, ajuste faça :
+
+```bash
+docker-compose down
+```
+
+```bash
+docker-compose run --rm --service-ports app sh
+```
+
+```bash
+docker-compose up -d
+```
+
 ## Acessar o Projeto
 
 API Laravel: http://localhost:80
@@ -65,6 +79,8 @@ Mailhog: http://localhost:1025
 PgAdmin: http://localhost:5050
 
 ## Usuários para Teste
+
+qualquer usuario senha => password
 
 Admin Sistema
 
